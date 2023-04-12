@@ -62,8 +62,8 @@
 
 	</el-row>
 
-	<el-dialog v-model="dialogFormVisible" :show-close="false" class="addConfigWin" :close-on-click-modal="false" destroy-on-close
-		:close-on-press-escape="false" :draggable="true">
+	<el-dialog v-model="dialogFormVisible" :show-close="false" class="addConfigWin" :close-on-click-modal="false"
+		destroy-on-close :close-on-press-escape="false" :draggable="true">
 		<template #header="{ close, titleId, titleClass }">
 			<div class="my-header">
 				<h4 :id="titleId" :class="titleClass">{{dialogName}}</h4>
@@ -166,13 +166,29 @@
 		</el-form>
 
 		<template #footer>
-			<span class="dialog-footer">
-				<el-button type="primary" @click="saveDBConfig">
-					<span v-if="SaveType=='Add'">确定</span>
-					<span v-else>保存</span>
-				</el-button>
-				<el-button @click="AddConfigDialogClose">取消</el-button>
-			</span>
+			<el-row >
+				<el-col :span="10" style="display: flex;justify-content: start;align-items: center;">
+					<el-button plain>
+						<el-icon><Promotion /></el-icon>
+						&nbsp;测试连接
+					</el-button>
+					<div v-if="false" style="display: flex;justify-content: start;align-items: center;padding-left: 20px;">
+						<el-icon><SuccessFilled /></el-icon>
+						<span>连接成功</span>
+					</div>
+					
+				</el-col>
+				<el-col :span="14">
+					<span class="dialog-footer">
+						<el-button type="primary" @click="saveDBConfig">
+							<span v-if="SaveType=='Add'">确定</span>
+							<span v-else>保存</span>
+						</el-button>
+						<el-button @click="AddConfigDialogClose">取消</el-button>
+					</span>
+				</el-col>
+			</el-row>
+
 		</template>
 	</el-dialog>
 
@@ -184,11 +200,13 @@
 		Plus,
 		Tools,
 		Close,
+		Promotion,
+		SuccessFilled,
 	} from '@element-plus/icons-vue'
-	import {
-		defineExpose,
-		defineEmits
-	} from 'vue'
+	// import {
+	// 	defineExpose,
+	// 	defineEmits
+	// } from 'vue'
 	import {
 		AddServerConfig,
 		GetServerConfigList,
@@ -410,7 +428,7 @@
 	}
 	const emptyFormData = () => {
 		FormData.key = ""
-		FormData.local_name =""
+		FormData.local_name = ""
 		FormData.dbType = ""
 		FormData.host = ""
 		FormData.port = ""
