@@ -1,6 +1,7 @@
 export namespace main {
 	
-	export class serverConfig {
+	export class ServerConfig {
+	    key: string;
 	    local_name: string;
 	    dbType: string;
 	    host: string;
@@ -16,13 +17,15 @@ export namespace main {
 	    ssh_keyfile: string;
 	    has_ssh_pass: boolean;
 	    ssh_password: string;
+	    conState: boolean;
 	
 	    static createFrom(source: any = {}) {
-	        return new serverConfig(source);
+	        return new ServerConfig(source);
 	    }
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.key = source["key"];
 	        this.local_name = source["local_name"];
 	        this.dbType = source["dbType"];
 	        this.host = source["host"];
@@ -38,6 +41,7 @@ export namespace main {
 	        this.ssh_keyfile = source["ssh_keyfile"];
 	        this.has_ssh_pass = source["has_ssh_pass"];
 	        this.ssh_password = source["ssh_password"];
+	        this.conState = source["conState"];
 	    }
 	}
 

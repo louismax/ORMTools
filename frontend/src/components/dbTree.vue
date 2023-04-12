@@ -1,11 +1,10 @@
 <template>
-	<el-tree :data="dataSource" node-key="id" empty-text="暂无配置" :highlight-current="true" :expand-on-click-node="false"
-		:check-on-click-node="true" @node-click="handleNodeClick" @current-change="currentNodeChange" default-expand-all
-		icon-class="none" ref="treeForm">
+	<el-tree :data="dataSource" node-key="key" empty-text="暂无数据库配置" :highlight-current="true"
+		:expand-on-click-node="false" :check-on-click-node="true" @node-click="handleNodeClick"
+		@current-change="currentNodeChange" default-expand-all icon-class="none" ref="treeForm">
 		<template #default="{ node, data }">
 			<span class="custom-tree-node">
 				<span class="tree-node-title">
-					<!-- <el-image style="width: 16px; height: 16px" :src="img_server" fit="contain" /> -->
 					<svg v-if="data.obj_type == 'connect'" style="width: 16px; height: 16px;padding-right: 4px;"
 						t="1680792160481" class="icon" viewBox="0 0 1024 1024" version="1.1"
 						xmlns="http://www.w3.org/2000/svg" p-id="3925" width="200" height="200">
@@ -103,7 +102,9 @@
 
 <script setup>
 	import {
-		ref
+		ref,
+		defineExpose,
+		defineEmits,
 	} from 'vue';
 	import {
 		Coin,
@@ -111,103 +112,94 @@
 		Edit,
 		Refresh,
 	} from '@element-plus/icons-vue'
-	import img_server from '../assets/images/server.png'
+
+	import {
+		GetServerConfigList,
+		DeleteServerConfig,
+	} from '../../wailsjs/go/main/App'
+
+
+	const emit = defineEmits(['openServerConfigEdit'])
+
+
+	defineExpose({
+		GetServerList
+	})
 
 	const treeForm = ref(null);
 	let selectId = ref(0)
-	let dataSource = ref([{
-			id: 1,
-			label: 'localhost_3306',
-			children: [],
-			conState: false,
-			obj_type: 'connect',
-		},
-		{
-			id: 2,
-			label: '192.168.0.200:3306',
-			children: [{
-					id: 4,
-					label: 'base_trade',
-					children: [],
-					conState: false,
-					obj_type: 'db',
-				},
-				{
-					id: 5,
-					label: 'biz_stock_sell_storage',
-					children: [],
-					conState: false,
-					obj_type: 'db',
-				}
-			],
-			conState: false,
-			obj_type: 'connect',
-		},
-		{
-			id: 3,
-			label: 'VM-201(开发)',
-			children: [{
-					id: 6,
-					label: 'mysql',
-					children: [],
-					conState: false,
-					obj_type: 'db',
-				},
-				{
-					id: 7,
-					label: 'base_basic',
-					children: [{
-							id: 8,
-							label: 'bs_school_organization',
-							children: [],
-							conState: false,
-							obj_type: 'table',
-						},
-						{
-							id: 9,
-							label: 'bs_user_student',
-							children: [],
-							conState: false,
-							obj_type: 'table',
-						},
-					],
-					conState: false,
-					obj_type: 'db',
-				},
-			],
-			conState: false,
-			obj_type: 'connect',
-		},
-	])
+	let dataSource = ref()
 
-	function currentNodeChange(data, node) {
+	GetServerList();
+
+	function GetServerList() {
+		GetServerConfigList().then(result => {
+			if (result.State == true) {
+				dataSource.value = result.Data
+			} else {
+				ElMessage.error(result.Message)
+			}
+		})
+
+	}
+
+	const currentNodeChange = (data, node) => {
 		// console.log("节点选中状态变化", data, node)
 	}
 
-	function handleNodeClick(data, node, tn, e) {
+	const handleNodeClick = (data, node, tn, e) => {
 		//console.log(node)
 	}
 
-	function openDB(obj) {
+	const openDB = (obj) => {
 		console.log("打开连接按钮点击事件:", obj)
 		obj.conState = true;
 	}
 
-	function closeDB(obj) {
+	const closeDB = (obj) => {
 		console.log("关闭按钮点击事件:", obj)
 		obj.conState = false;
 	}
 
-	function refresh(obj) {
+	const refresh = (obj) => {
 		console.log("刷新按钮点击事件:", obj)
 	}
 
-	function editDB(obj) {
+	const editDB = (obj) => {
 		console.log("编辑按钮点击事件:", obj)
+		emit('openServerConfigEdit',obj.key);
 	}
 
-	function deleteDB(obj) {
-		console.log("删除按钮点击事件:", obj)
+
+	const deleteDB = (obj) => {
+		// console.log("删除按钮点击事件:", obj)
+		ElMessageBox.confirm(
+				'删除服务器配置后将不可恢复,是否继续操作?',
+				'确定删除?', {
+					confirmButtonText: '确定',
+					cancelButtonText: '取消',
+					type: 'warning',
+				}
+			)
+			.then(() => {
+				DeleteServerConfig(obj.key).then(result => {
+					if (result.State == true) {
+						GetServerList();
+						ElMessage({
+							type: 'success',
+							message: '删除成功',
+						})
+					} else {
+						ElMessage.error(result.Message)
+					}
+				})
+			})
+			.catch(() => {
+				ElMessage({
+					type: 'info',
+					message: '取消删除操作',
+				})
+			})
 	}
 </script>
 

@@ -3,11 +3,11 @@
 	<div class="common-layout">
 		<el-container class="container">
 			<el-header class="topTitle">
-				<Header />
+				<Header ref="headerRef" @GetServerList="GetServerListToTree" />
 			</el-header>
 			<el-container class="MainBox">
 				<el-aside class="leftAside">
-					<dbTree />
+					<dbTree ref="dbTreeRef" @openServerConfigEdit="openServerConfigEdit" />
 				</el-aside>
 				<DragAdjustWidth />
 				<el-main class="rightMain">Main
@@ -24,11 +24,24 @@
 	import Header from './components/Header.vue'
 	import dbTree from './components/dbTree.vue'
 	import {
+		ref,
 		reactive
 	} from 'vue'
 	import {
 		GetUserAppDataPath
 	} from '../wailsjs/go/main/App'
+
+	const dbTreeRef = ref()
+	const headerRef = ref()
+
+	const GetServerListToTree = () => {
+		dbTreeRef.value.GetServerList()
+	}
+
+	const openServerConfigEdit = (key) => {
+		headerRef.value.OpenConfigEdit(key)
+	}
+
 
 	const data = reactive({
 		name: "",
