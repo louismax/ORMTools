@@ -28,7 +28,7 @@ func (a *App) startup(ctx context.Context) {
 	if ok, _ := PathExists(serverDataPath); !ok {
 		file, err := os.OpenFile(serverDataPath, os.O_WRONLY|os.O_CREATE, 0666)
 		if err != nil {
-			runtime.LogErrorf(ctx, "文件创建失败", err.Error())
+			runtime.LogErrorf(ctx, "文件创建失败,err:%+v", err)
 			return
 		}
 		defer func() {
@@ -37,13 +37,13 @@ func (a *App) startup(ctx context.Context) {
 		encoder := gob.NewEncoder(file)
 		err = encoder.Encode(ServerConfigMap)
 		if err != nil {
-			runtime.LogErrorf(ctx, "编码错误", err.Error())
+			runtime.LogErrorf(ctx, "编码错误,err:%+v", err)
 			return
 		}
 	} else {
 		file, err := os.Open(serverDataPath)
 		if err != nil {
-			runtime.LogErrorf(ctx, "文件打开失败", err.Error())
+			runtime.LogErrorf(ctx, "文件打开失败,err:%+v", err)
 			return
 		}
 		defer func() {
@@ -52,7 +52,7 @@ func (a *App) startup(ctx context.Context) {
 		decoder := gob.NewDecoder(file)
 		err = decoder.Decode(&ServerConfigMap)
 		if err != nil {
-			runtime.LogErrorf(ctx, "解码失败", err.Error())
+			runtime.LogErrorf(ctx, "解码失败,err:%+v", err)
 			return
 		}
 	}

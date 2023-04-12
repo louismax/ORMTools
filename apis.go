@@ -36,14 +36,14 @@ func (a *App) GetServerConfig(key string) interface{} {
 	res := ServerConfigMap[key]
 	planPwd, err := helpers.DecryptByAes(res.Password)
 	if err != nil {
-		runtime.LogErrorf(a.ctx, "敏感数据解密失败", err.Error())
+		runtime.LogErrorf(a.ctx, "敏感数据解密失败:%+v", err)
 		return a.ReturnError("敏感数据解密失败")
 	}
 	res.Password = string(planPwd)
 	if res.HasUseSSH && res.HasSshPass {
 		planSSHPwd, err := helpers.DecryptByAes(res.SshPassword)
 		if err != nil {
-			runtime.LogErrorf(a.ctx, "敏感数据解密失败,err:", err.Error())
+			runtime.LogErrorf(a.ctx, "敏感数据解密失败,err:%+v", err)
 			return a.ReturnError("敏感数据解密失败[2]")
 		}
 		res.SshPassword = string(planSSHPwd)
@@ -64,14 +64,14 @@ func (a *App) AddServerConfig(req ServerConfig) interface{} {
 	req.Key = uuid.New().String()
 	aesPwd, err := helpers.EncryptByAes([]byte(req.Password))
 	if err != nil {
-		runtime.LogErrorf(a.ctx, "AES加密失败,err:", err.Error())
+		runtime.LogErrorf(a.ctx, "AES加密失败,err:%+v", err)
 		return a.ReturnError("AES加密失败[1]")
 	}
 	req.Password = aesPwd
 	if req.HasUseSSH && req.HasSshPass {
 		aesSSHPwd, err := helpers.EncryptByAes([]byte(req.SshPassword))
 		if err != nil {
-			runtime.LogErrorf(a.ctx, "AES加密失败,err:", err.Error())
+			runtime.LogErrorf(a.ctx, "AES加密失败,err:%+v", err)
 			return a.ReturnError("AES加密失败[2]")
 		}
 		req.SshPassword = aesSSHPwd
@@ -79,7 +79,7 @@ func (a *App) AddServerConfig(req ServerConfig) interface{} {
 	ServerConfigMap[req.Key] = req
 	file, err := os.OpenFile(serverDataPath, os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
-		runtime.LogErrorf(a.ctx, "文件创建失败", err.Error())
+		runtime.LogErrorf(a.ctx, "文件创建失败,err:%+v", err)
 		return a.ReturnError("文件创建失败")
 	}
 	defer func() {
@@ -88,7 +88,7 @@ func (a *App) AddServerConfig(req ServerConfig) interface{} {
 	encoder := gob.NewEncoder(file)
 	err = encoder.Encode(ServerConfigMap)
 	if err != nil {
-		runtime.LogErrorf(a.ctx, "gob编码错误", err.Error())
+		runtime.LogErrorf(a.ctx, "gob编码错误,err:%+v", err)
 		return a.ReturnError("gob编码错误")
 	}
 	return a.ReturnSuccess("成功")
@@ -100,14 +100,14 @@ func (a *App) EditServerConfig(req ServerConfig) interface{} {
 	}
 	aesPwd, err := helpers.EncryptByAes([]byte(req.Password))
 	if err != nil {
-		runtime.LogErrorf(a.ctx, "AES加密失败,err:", err.Error())
+		runtime.LogErrorf(a.ctx, "AES加密失败,err:%+v", err)
 		return a.ReturnError("AES加密失败[1]")
 	}
 	req.Password = aesPwd
 	if req.HasUseSSH && req.HasSshPass {
 		aesSSHPwd, err := helpers.EncryptByAes([]byte(req.SshPassword))
 		if err != nil {
-			runtime.LogErrorf(a.ctx, "AES加密失败,err:", err.Error())
+			runtime.LogErrorf(a.ctx, "AES加密失败,err:%+v", err)
 			return a.ReturnError("AES加密失败[2]")
 		}
 		req.SshPassword = aesSSHPwd
@@ -115,7 +115,7 @@ func (a *App) EditServerConfig(req ServerConfig) interface{} {
 	ServerConfigMap[req.Key] = req
 	file, err := os.OpenFile(serverDataPath, os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
-		runtime.LogErrorf(a.ctx, "文件创建失败", err.Error())
+		runtime.LogErrorf(a.ctx, "文件创建失败,err:%+v", err)
 		return a.ReturnError("文件创建失败")
 	}
 	defer func() {
@@ -125,7 +125,7 @@ func (a *App) EditServerConfig(req ServerConfig) interface{} {
 	fmt.Printf("%+v", ServerConfigMap)
 	err = encoder.Encode(ServerConfigMap)
 	if err != nil {
-		runtime.LogErrorf(a.ctx, "gob编码错误", err.Error())
+		runtime.LogErrorf(a.ctx, "gob编码错误,err:%+v", err)
 		return a.ReturnError("gob编码错误")
 	}
 	return a.ReturnSuccess("成功")
@@ -139,7 +139,7 @@ func (a *App) DeleteServerConfig(key string) interface{} {
 
 	file, err := os.OpenFile(serverDataPath, os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
-		runtime.LogErrorf(a.ctx, "文件创建失败", err.Error())
+		runtime.LogErrorf(a.ctx, "文件创建失败,err:%+v", err)
 		return a.ReturnError("文件创建失败")
 	}
 	defer func() {
@@ -148,7 +148,7 @@ func (a *App) DeleteServerConfig(key string) interface{} {
 	encoder := gob.NewEncoder(file)
 	err = encoder.Encode(ServerConfigMap)
 	if err != nil {
-		runtime.LogErrorf(a.ctx, "gob编码错误", err.Error())
+		runtime.LogErrorf(a.ctx, "gob编码错误,err:%+v", err)
 		return a.ReturnError("gob编码错误")
 	}
 	return a.ReturnSuccess("成功")
