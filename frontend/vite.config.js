@@ -8,42 +8,43 @@ import Components from 'unplugin-vue-components/vite'
 import {
 	ElementPlusResolver
 } from 'unplugin-vue-components/resolvers'
+import ElementPlus from 'unplugin-element-plus/vite'
 
-// https://vitejs.dev/config/
 export default defineConfig({
 	resolve: {
-		alias: {
-			'@': path.resolve(__dirname, 'src'),
-			"_C": path.resolve(__dirname, "src/components"),
-			"views": path.resolve(__dirname, "src/views")
-		}
+		alias: [{
+			find: '@',
+			replacement: path.resolve(__dirname, 'src'),
+		}, ],
 	},
 	css: {
 		preprocessorOptions: {
 			scss: {
-				// 自定义的主题色
 				additionalData: `@use "@/styles/element/index.scss" as *;`,
 			},
 		},
 	},
-
 	plugins: [
 		vue(),
 		AutoImport({
 			// Auto import functions from Vue, e.g. ref, reactive, toRef...
 			// 自动导入 Vue 相关函数，如：ref, reactive, toRef 等
 			imports: ['vue'],
-
 			resolvers: [
-				ElementPlusResolver(),
+				ElementPlusResolver({
+					importStyle: 'sass',
+				})
 			],
 		}),
 		Components({
 			resolvers: [
 				ElementPlusResolver({
-					importStyle: "sass",
+					importStyle: 'sass',
 				}),
 			],
+		}),
+		ElementPlus({
+			useSource: true,
 		}),
 	]
 })

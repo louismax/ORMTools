@@ -203,6 +203,7 @@
 		Promotion,
 		SuccessFilled,
 	} from '@element-plus/icons-vue'
+	import 'element-plus/theme-chalk/display.css'
 	// import {
 	// 	defineExpose,
 	// 	defineEmits

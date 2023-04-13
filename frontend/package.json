@@ -1,7 +1,7 @@
 {
   "name": "frontend",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -12,7 +12,7 @@
     "@element-plus/icons-vue": "^2.1.0",
     "element-plus": "^2.3.2",
     "node-sass": "^8.0.0",
-    "sass": "^1.60.0",
+    "sass": "^1.62.0",
     "sass-loader": "^13.2.2",
     "unplugin-auto-import": "^0.15.2",
     "unplugin-icons": "^0.16.1",
@@ -21,6 +21,6 @@
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^3.0.3",
-    "vite": "^3.0.7"
+    "vite": "^4.2.1"
   }
 }
