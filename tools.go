@@ -1,9 +1,11 @@
 package main
 
 import (
+	"encoding/json"
 	"github.com/mitchellh/go-homedir"
 	"log"
 	"os"
+	"strconv"
 )
 
 var AppDataPath string
@@ -57,4 +59,76 @@ func createDir(dirName string) bool {
 		return false
 	}
 	return true
+}
+
+// InterfaceToInt64 interface{} 转 int64
+func InterfaceToInt64(value interface{}) int64 {
+	// interface 转 int64
+	var key int64
+	if value == nil {
+		return key
+	}
+
+	switch value.(type) {
+	case float64:
+		ft := value.(float64)
+		keys := strconv.FormatFloat(ft, 'f', -1, 64)
+		key, _ = strconv.ParseInt(keys, 10, 64)
+	case float32:
+		ft := value.(float32)
+		keys := strconv.FormatFloat(float64(ft), 'f', -1, 64)
+		key, _ = strconv.ParseInt(keys, 10, 64)
+	case int:
+		it := value.(int)
+		keys := strconv.Itoa(it)
+		key, _ = strconv.ParseInt(keys, 10, 64)
+	case uint:
+		it := value.(uint)
+		keys := strconv.Itoa(int(it))
+		key, _ = strconv.ParseInt(keys, 10, 64)
+	case int8:
+		it := value.(int8)
+		keys := strconv.Itoa(int(it))
+		key, _ = strconv.ParseInt(keys, 10, 64)
+	case uint8:
+		it := value.(uint8)
+		keys := strconv.Itoa(int(it))
+		key, _ = strconv.ParseInt(keys, 10, 64)
+	case int16:
+		it := value.(int16)
+		keys := strconv.Itoa(int(it))
+		key, _ = strconv.ParseInt(keys, 10, 64)
+	case uint16:
+		it := value.(uint16)
+		keys := strconv.Itoa(int(it))
+		key, _ = strconv.ParseInt(keys, 10, 64)
+	case int32:
+		it := value.(int32)
+		keys := strconv.Itoa(int(it))
+		key, _ = strconv.ParseInt(keys, 10, 64)
+	case uint32:
+		it := value.(uint32)
+		keys := strconv.Itoa(int(it))
+		key, _ = strconv.ParseInt(keys, 10, 64)
+	case int64:
+		it := value.(int64)
+		keys := strconv.FormatInt(it, 10)
+		key, _ = strconv.ParseInt(keys, 10, 64)
+	case uint64:
+		it := value.(uint64)
+		keys := strconv.FormatUint(it, 10)
+		key, _ = strconv.ParseInt(keys, 10, 64)
+	case string:
+		keys := value.(string)
+		key, _ = strconv.ParseInt(keys, 10, 64)
+	case []byte:
+		keys := string(value.([]byte))
+		key, _ = strconv.ParseInt(keys, 10, 64)
+	default:
+		newValue, _ := json.Marshal(value)
+		keys := string(newValue)
+		key, _ = strconv.ParseInt(keys, 10, 64)
+	}
+
+	return key
 }

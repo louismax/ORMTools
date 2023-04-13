@@ -17,3 +17,5 @@ export function GetUserAppDataPath(arg1:string):Promise<string>;
 export function ReturnError(arg1:string):Promise<{[key: string]: any}>;
 
 export function ReturnSuccess(arg1:any):Promise<{[key: string]: any}>;
+
+export function TestDBConnect(arg1:main.ServerConfig):Promise<any>;

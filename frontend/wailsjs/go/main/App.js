@@ -33,3 +33,7 @@ export function ReturnError(arg1) {
 export function ReturnSuccess(arg1) {
   return window['go']['main']['App']['ReturnSuccess'](arg1);
 }
+
+export function TestDBConnect(arg1) {
+  return window['go']['main']['App']['TestDBConnect'](arg1);
+}

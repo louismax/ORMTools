@@ -167,15 +167,17 @@
 
 		<template #footer>
 			<el-row >
-				<el-col :span="10" style="display: flex;justify-content: start;align-items: center;">
-					<el-button plain>
+				<el-col :span="10" style=" display: flex;justify-content: start;align-items: center;">
+					<el-button plain @click="testServerConn">
 						<el-icon><Promotion /></el-icon>
 						&nbsp;测试连接
 					</el-button>
-					<div v-if="false" style="display: flex;justify-content: start;align-items: center;padding-left: 20px;">
-						<el-icon><SuccessFilled /></el-icon>
-						<span>连接成功</span>
-					</div>
+          <div ref="connSuccess"  style="display: none;justify-content: start;align-items: center;padding-left: 20px;">
+            <el-icon color="#67C23A">
+              <SuccessFilled />
+            </el-icon>
+            <span class="el-form-item__label">连接成功</span>
+          </div>
 					
 				</el-col>
 				<el-col :span="14">
@@ -213,12 +215,14 @@
 		GetServerConfigList,
 		GetServerConfig,
 		EditServerConfig,
+    TestDBConnect,
 	} from '../../wailsjs/go/main/App'
 
 
 	const emit = defineEmits(['GetServerList'])
 	const fileSelect = ref();
 	const ruleFormRef = ref();
+  const connSuccess = ref();
 	let dialogFormVisible = ref(false);
 	let FormData = reactive({
 		key: "", //仅编辑时存在
@@ -341,7 +345,14 @@
 	});
 
 
-	const openAddDialogForm = () => {
+	const openAddDialogForm = (e) => {
+    // 添加失去焦点事件
+    let target = e.target;
+    if (target.nodeName === "BUTTON" || target.nodeName === "SPAN") {
+      target.parentNode.blur();
+    }
+    target.blur();
+
 		SaveType = "Add"
 		dialogName = "新建服务器配置";
 		dialogFormVisible.value = true;
@@ -445,6 +456,39 @@
 		FormData.has_ssh_pass = false
 		FormData.ssh_password = ""
 	}
+
+  const testServerConn = (e) => {
+    // 添加失去焦点事件
+    let target = e.target;
+    if (target.nodeName === "BUTTON" || target.nodeName === "SPAN") {
+      target.parentNode.blur();
+    }
+    target.blur();
+    ruleFormRef.value.validate((valid) => {
+      if (valid) {
+        const loading = ElLoading.service({
+          //lock: true,
+          text: 'Loading',
+          //background: 'rgba(0, 0, 0, 0.7)',
+        })
+        TestDBConnect(FormData).then(result => {
+          loading.close()
+          console.log(result)
+          if (result.State == true) {
+            ElMessage.success('测试连接成功！')
+            connSuccess.value.style.display = "flex"
+          } else {
+            connSuccess.value.style.display = "none"
+            ElMessageBox({
+              title: "连接测试失败",
+              message: result.Message,
+              type: 'error'
+            })
+          }
+        })
+      }
+    })
+  }
 </script>
 
 <style>
