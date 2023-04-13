@@ -22,11 +22,12 @@ func (a *App) GetServerConfigList() interface{} {
 
 	for _, v := range ServerConfigMap {
 		tree = append(tree, TreeData{
-			Key:      v.Key,
-			Label:    v.LocalName,
-			Children: nil,
-			ConState: false,
-			ObjType:  constant.Connect,
+			Key:          v.Key,
+			Label:        v.LocalName,
+			Children:     nil,
+			ConState:     false,
+			ObjType:      constant.Connect,
+			HasRecordPwd: v.HasRecordPwd,
 		})
 	}
 
@@ -220,4 +221,11 @@ func (a *App) TestDBConnect(req ServerConfig) interface{} {
 		return a.ReturnError("Ping失败,ERR:" + err.Error())
 	}
 	return a.ReturnSuccess(sqlDB.Stats())
+}
+
+func (a *App) OpenDBConnect(req ServerConfig) interface{} {
+	if _, ok := ServerConfigMap[req.Key]; !ok {
+		return a.ReturnError("配置不存在或已删除，请重启应用后重试!")
+	}
+	return a.ReturnSuccess("成功")
 }

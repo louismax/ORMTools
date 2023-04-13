@@ -26,6 +26,10 @@ export function GetUserAppDataPath(arg1) {
   return window['go']['main']['App']['GetUserAppDataPath'](arg1);
 }
 
+export function OpenDBConnect(arg1) {
+  return window['go']['main']['App']['OpenDBConnect'](arg1);
+}
+
 export function ReturnError(arg1) {
   return window['go']['main']['App']['ReturnError'](arg1);
 }

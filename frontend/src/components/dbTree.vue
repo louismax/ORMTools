@@ -154,6 +154,35 @@
 
 	const openDB = (obj) => {
 		console.log("打开连接按钮点击事件:", obj)
+		if(obj.has_record_pwd == false){
+			ElMessageBox.prompt('请输入数据库服务器登录用户密码以继续操作:', '身份验证', {
+			    confirmButtonText: '确认',
+			    cancelButtonText: '取消',
+				 inputPattern:/^.+$/,
+			    inputErrorMessage: '密码不允许为空',
+			  })
+			    .then(({ value }) => {
+					obj.children = [{
+						children: null,
+						conState: true,
+						key: "dead4be5-110d-4fde-9e65-c52f85b480b9111",
+						label: "base_basic",
+						obj_type: "db",
+					}]
+			      // ElMessage({
+			      //   type: 'success',
+			      //   message: `Your email is:${value}`,
+			      // })
+			    })
+			    .catch(() => {
+			      ElMessage({
+			        type: 'info',
+			        message: '操作取消',
+			      })
+			    })
+		}else{
+			
+		}
 		obj.conState = true;
 	}
 

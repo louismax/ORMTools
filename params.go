@@ -35,9 +35,10 @@ func (a *App) ReturnError(msg string) map[string]interface{} {
 }
 
 type TreeData struct {
-	Key      string     `json:"key"`
-	Label    string     `json:"label"`
-	Children []TreeData `json:"children"`
-	ConState bool       `json:"conState"`
-	ObjType  string     `json:"obj_type"`
+	Key          string     `json:"key"`
+	Label        string     `json:"label"`
+	Children     []TreeData `json:"children"`
+	ConState     bool       `json:"conState"`
+	ObjType      string     `json:"obj_type"`
+	HasRecordPwd bool       `json:"has_record_pwd"`
 }
