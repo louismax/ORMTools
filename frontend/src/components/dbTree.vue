@@ -194,7 +194,13 @@
 			    inputErrorMessage: '密码不允许为空',
 			  })
 			    .then(({ value }) => {
+					const loading = ElLoading.service({
+						//lock: true,
+						text: 'Loading',
+						background: 'rgba(0, 0, 0, 0.7)',
+					})
 					OpenDBConnect({key:obj.key,password:value}).then(result => {
+						loading.close()
 						if (result.State == true) {
 							obj.conState = true;
 							obj.children = result.Data;
@@ -216,7 +222,13 @@
 			      })
 			    })
 		}else{
+			const loading = ElLoading.service({
+				//lock: true,
+				text: 'Loading',
+				background: 'rgba(0, 0, 0, 0.7)',
+			})
 			OpenDBConnect({key:obj.key}).then(result => {
+				loading.close()
 				if (result.State == true) {
 					ElMessage({
 					  type: 'success',

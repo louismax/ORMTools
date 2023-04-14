@@ -11,7 +11,7 @@
 				</el-aside>
 				<DragAdjustWidth />
 				<el-main class="rightMain">Main
-					<div id="result" class="result">{{ data.resultText }}</div>
+					<!-- <div id="result" class="result">{{ data.resultText }}</div> -->
 				</el-main>
 			</el-container>
 		</el-container>
@@ -27,9 +27,9 @@
 		ref,
 		reactive
 	} from 'vue'
-	import {
-		GetUserAppDataPath
-	} from '../wailsjs/go/main/App'
+	// import {
+	// 	GetUserAppDataPath
+	// } from '../wailsjs/go/main/App'
 
 	const dbTreeRef = ref()
 	const headerRef = ref()
@@ -43,17 +43,17 @@
 	}
 
 
-	const data = reactive({
-		name: "",
-		resultText: "",
-	})
-	greet();
+	// const data = reactive({
+	// 	name: "",
+	// 	resultText: "",
+	// })
+	// greet();
 
-	function greet() {
-		GetUserAppDataPath().then(result => {
-			data.resultText = result
-		})
-	}
+	// function greet() {
+	// 	GetUserAppDataPath().then(result => {
+	// 		data.resultText = result
+	// 	})
+	// }
 </script>
 
 <style>

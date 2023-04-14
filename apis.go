@@ -16,20 +16,16 @@ import (
 	"time"
 )
 
-func (a *App) GetUserAppDataPath(name string) string {
-	return getUserAppDataPath()
-}
-
 func (a *App) GetServerConfigList() interface{} {
 	tree := make([]TreeData, 0)
 
 	for _, v := range ServerConfigMap {
 		tmp := TreeData{
-			Key:          v.Key,
-			Label:        v.LocalName,
-			ObjType:      constant.Connect,
-			HasRecordPwd: v.HasRecordPwd,
-			CreateDate:   v.CreateDate,
+			Key:            v.Key,
+			Label:          v.LocalName,
+			ObjType:        constant.Connect,
+			HasRecordPwd:   v.HasRecordPwd,
+			CreateDateUnix: v.CreateDateUnix,
 		}
 		if _, ok := ServerConnMap[v.Key]; ok {
 			tmp.ConState = true
@@ -48,7 +44,7 @@ func (a *App) GetServerConfigList() interface{} {
 		tree = append(tree, tmp)
 	}
 	sort.Slice(tree, func(i, j int) bool {
-		return tree[i].CreateDate.Unix() < tree[j].CreateDate.Unix()
+		return tree[i].CreateDateUnix < tree[j].CreateDateUnix
 	})
 	return a.ReturnSuccess(tree)
 }
@@ -86,7 +82,7 @@ func (a *App) AddServerConfig(req ServerConfig) interface{} {
 		}
 	}
 	req.Key = uuid.New().String()
-	req.CreateDate = time.Now()
+	req.CreateDateUnix = time.Now().Unix()
 	aesPwd, err := helpers.EncryptByAes([]byte(req.Password))
 	if err != nil {
 		runtime.LogErrorf(a.ctx, "AES加密失败,err:%+v", err)
@@ -123,7 +119,7 @@ func (a *App) EditServerConfig(req ServerConfig) interface{} {
 	if _, ok := ServerConfigMap[req.Key]; !ok {
 		return a.ReturnError("配置不存在或已删除，请重启应用后重试!")
 	}
-	req.CreateDate = ServerConfigMap[req.Key].CreateDate
+	req.CreateDateUnix = ServerConfigMap[req.Key].CreateDateUnix
 	aesPwd, err := helpers.EncryptByAes([]byte(req.Password))
 	if err != nil {
 		runtime.LogErrorf(a.ctx, "AES加密失败,err:%+v", err)
@@ -263,7 +259,9 @@ func (a *App) OpenDBConnect(req ServerConfig) interface{} {
 		}
 		dc.Password = string(decPwd)
 	}
-	if req.HasUseSSH {
+	fmt.Printf("%+v", dc)
+
+	if ServerConfigMap[req.Key].HasUseSSH {
 		sc := dbTools.SSH{
 			Host: ServerConfigMap[req.Key].SshHost,
 			User: ServerConfigMap[req.Key].SshUser,
@@ -282,6 +280,7 @@ func (a *App) OpenDBConnect(req ServerConfig) interface{} {
 			sc.Type = constant.Key
 			sc.Password = ServerConfigMap[req.Key].SshKeyfile
 		}
+		fmt.Printf("%+v", sc)
 
 		db, dial, err := dbTools.SSHOpenDB(sc, dc)
 		if err != nil {
