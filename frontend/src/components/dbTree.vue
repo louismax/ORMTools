@@ -33,11 +33,11 @@
 							p-id="7261" fill="#707070">
 						</path>
 					</svg>
-					<span>
+					<span :class="data.obj_type == 'connect'?'treeNodetitleSpan':''" :data-objType="data.obj_type" :data-conState="data.conState" :data-key="data.key" :data-isCurrent="node.isCurrent">
 						{{node.label}}
 					</span>
 				</span>
-				<span v-if="node.isCurrent && data.obj_type == 'connect'">
+				<span v-if="node.isCurrent && data.obj_type == 'connect'" class="tree-node-btn">
 					<el-tooltip v-if="!data.conState" content="打开连接" placement="bottom" effect="light">
 						<el-button :text="true" style="width: 32px;height: 27px;margin: 0;" @click.stop="openDB(data)">
 							<svg style="width: 16px; height: 16px;" t="1680797183435" class="icon"
@@ -155,9 +155,22 @@
 	}
 
 	const handleNodeClick = (data, node, tn, e) => {
-		console.log("点击节点:", data)
-		if(data.obj_type == "db" && data.children == null){
-			console.log(node)
+		console.log("点击节点:", node)
+		var treeSpan = document.getElementsByClassName('treeNodetitleSpan');
+		for (let j = 0; j < treeSpan.length; j++) {
+			if(treeSpan[j].dataset.objtype == "connect"){
+				console.log(treeSpan)
+				if(treeSpan[j].parentNode.parentNode.clientWidth <330 && treeSpan[j].dataset.key == data.key){
+					treeSpan[j].className = "treeNodetitleSpan tree-node-title-span"
+				}else{
+					treeSpan[j].className = "treeNodetitleSpan"
+				}
+			}
+		}
+		
+		if(data.obj_type == "connect"){
+			
+		}else if(data.obj_type == "db" && data.children == null){
 			QueryTableList(data.parentSvrKey,data.label).then(result => {
 				if (result.State == true) {
 					data.children = result.Data;
@@ -327,11 +340,22 @@
 		justify-content: space-between;
 		font-size: 14px;
 		/* padding-right: 8px; */
+		
+		
 	}
+	
 
 	.tree-node-title {
 		display: flex;
 		justify-content: start;
 		align-items: center;
 	}
+	
+	.tree-node-title-span{
+		max-width: 150px;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
 </style>
