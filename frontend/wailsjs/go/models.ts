@@ -17,7 +17,6 @@ export namespace main {
 	    ssh_keyfile: string;
 	    has_ssh_pass: boolean;
 	    ssh_password: string;
-	    conState: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new ServerConfig(source);
@@ -41,7 +40,6 @@ export namespace main {
 	        this.ssh_keyfile = source["ssh_keyfile"];
 	        this.has_ssh_pass = source["has_ssh_pass"];
 	        this.ssh_password = source["ssh_password"];
-	        this.conState = source["conState"];
 	    }
 	}
 

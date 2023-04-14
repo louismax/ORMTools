@@ -1,5 +1,14 @@
 package main
 
+import (
+	"golang.org/x/crypto/ssh"
+	"gorm.io/gorm"
+)
+
+var serverDataPath string
+var ServerConfigMap map[string]ServerConfig
+var ServerConnMap map[string]ServerConn
+
 type ServerConfig struct {
 	Key           string `json:"key"`
 	LocalName     string `json:"local_name"`
@@ -17,7 +26,13 @@ type ServerConfig struct {
 	SshKeyfile    string `json:"ssh_keyfile"`
 	HasSshPass    bool   `json:"has_ssh_pass"`
 	SshPassword   string `json:"ssh_password"`
-	ConState      bool   `json:"conState"`
+	//ConState      bool   `json:"conState"`
+}
+
+type ServerConn struct {
+	DB        *gorm.DB
+	SshClient *ssh.Client
+	Children  []TreeData `json:"children"`
 }
 
 func (a *App) ReturnSuccess(Data interface{}) map[string]interface{} {

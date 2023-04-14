@@ -21,14 +21,19 @@ func (a *App) GetServerConfigList() interface{} {
 	tree := make([]TreeData, 0)
 
 	for _, v := range ServerConfigMap {
-		tree = append(tree, TreeData{
+		tmp := TreeData{
 			Key:          v.Key,
 			Label:        v.LocalName,
 			Children:     nil,
 			ConState:     false,
 			ObjType:      constant.Connect,
 			HasRecordPwd: v.HasRecordPwd,
-		})
+		}
+		if _, ok := ServerConnMap[v.Key]; ok {
+			tmp.ConState = true
+			tmp.Children = ServerConnMap[v.Key].Children
+		}
+		tree = append(tree, tmp)
 	}
 
 	return a.ReturnSuccess(tree)
@@ -227,5 +232,98 @@ func (a *App) OpenDBConnect(req ServerConfig) interface{} {
 	if _, ok := ServerConfigMap[req.Key]; !ok {
 		return a.ReturnError("配置不存在或已删除，请重启应用后重试!")
 	}
-	return a.ReturnSuccess("成功")
+	dc := dbTools.MySQL{
+		Host:     ServerConfigMap[req.Key].Host,
+		User:     ServerConfigMap[req.Key].Username,
+		Port:     int(InterfaceToInt64(ServerConfigMap[req.Key].Port)),
+		Database: "mysql",
+	}
+	if !ServerConfigMap[req.Key].HasRecordPwd {
+		dc.Password = req.Password
+	} else {
+		decPwd, err := helpers.DecryptByAes(ServerConfigMap[req.Key].Password)
+		if err != nil {
+			runtime.LogErrorf(a.ctx, "AES解密失败,err:%+v", err)
+			return a.ReturnError("AES解密失败[1]")
+		}
+		dc.Password = string(decPwd)
+	}
+	if req.HasUseSSH {
+		sc := dbTools.SSH{
+			Host: ServerConfigMap[req.Key].SshHost,
+			User: ServerConfigMap[req.Key].SshUser,
+			Port: int(InterfaceToInt64(ServerConfigMap[req.Key].SshPort)),
+		}
+		if ServerConfigMap[req.Key].HasSshPass {
+			sc.Type = constant.Password
+			decPwd, err := helpers.DecryptByAes(ServerConfigMap[req.Key].SshPassword)
+			if err != nil {
+				runtime.LogErrorf(a.ctx, "AES解密失败,err:%+v", err)
+				return a.ReturnError("AES解密失败[1]")
+			}
+			sc.Password = string(decPwd)
+		}
+		if ServerConfigMap[req.Key].HasSshKeyfile {
+			sc.Type = constant.Key
+			sc.Password = ServerConfigMap[req.Key].SshKeyfile
+		}
+
+		db, dial, err := dbTools.SSHOpenDB(sc, dc)
+		if err != nil {
+			runtime.LogErrorf(a.ctx, "数据库连接失败,err:%+v", err)
+			return a.ReturnError("数据库连接失败,ERR:" + err.Error())
+		}
+		ServerConnMap[req.Key] = ServerConn{
+			DB:        db,
+			SshClient: dial,
+		}
+	} else {
+		db, err := dbTools.OpenDB(dc)
+		if err != nil {
+			runtime.LogErrorf(a.ctx, "数据库连接失败,err:%+v", err)
+			return a.ReturnError("数据库连接失败,ERR:" + err.Error())
+		}
+		ServerConnMap[req.Key] = ServerConn{
+			DB:        db,
+			SshClient: nil,
+		}
+	}
+	dataBases := make([]string, 0)
+	if err := ServerConnMap[req.Key].DB.Debug().Raw("show databases;").Scan(&dataBases).Error; err != nil {
+		runtime.LogErrorf(a.ctx, "数据库查询失败,err:%+v", err)
+		return a.ReturnError("数据库查询失败,ERR:" + err.Error())
+	}
+	dbTree := make([]TreeData, 0)
+	for _, v := range dataBases {
+		dbTree = append(dbTree, TreeData{
+			Key:      v,
+			Label:    v,
+			Children: nil,
+			ObjType:  "db",
+		})
+	}
+	svrCon := ServerConnMap[req.Key]
+	svrCon.Children = dbTree
+	ServerConnMap[req.Key] = svrCon
+	return a.ReturnSuccess(dbTree)
+}
+
+func (a *App) CloseDBConnect(key string) interface{} {
+	if _, ok := ServerConfigMap[key]; !ok {
+		return a.ReturnError("配置不存在或已删除，请重启应用后重试!")
+	}
+
+	sqlDB, err := ServerConnMap[key].DB.DB()
+	if err != nil {
+		runtime.LogErrorf(a.ctx, "获取DB实例失败,err:%+v", err)
+		return a.ReturnError("获取DB实例失败")
+	}
+	_ = sqlDB.Close()
+	if ServerConnMap[key].SshClient != nil {
+		_ = ServerConnMap[key].SshClient.Close()
+	}
+
+	delete(ServerConnMap, key)
+
+	return a.ReturnSuccess("操作成功")
 }

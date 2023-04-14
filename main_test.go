@@ -2,6 +2,7 @@ package main
 
 import (
 	"changeme/dbTools"
+	"fmt"
 	"testing"
 )
 
@@ -72,5 +73,10 @@ func TestGorm(t *testing.T) {
 	}
 	//返回数据库统计信息
 	t.Logf("实时数据库统计信息:%+v", sqlDB.Stats())
-
+	dataBases := make([]string, 0)
+	if err = db.Raw("show databases;").Scan(&dataBases).Error; err != nil {
+		t.Logf("sql执行失败,err:%+v", err)
+		return
+	}
+	fmt.Println(dataBases)
 }

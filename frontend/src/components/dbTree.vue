@@ -117,11 +117,12 @@
 	import {
 		GetServerConfigList,
 		DeleteServerConfig,
+		OpenDBConnect,
+		CloseDBConnect,
 	} from '../../wailsjs/go/main/App'
 
 
 	const emit = defineEmits(['openServerConfigEdit'])
-
 
 	defineExpose({
 		GetServerList
@@ -162,17 +163,25 @@
 			    inputErrorMessage: '密码不允许为空',
 			  })
 			    .then(({ value }) => {
-					obj.children = [{
-						children: null,
-						conState: true,
-						key: "dead4be5-110d-4fde-9e65-c52f85b480b9111",
-						label: "base_basic",
-						obj_type: "db",
-					}]
-			      // ElMessage({
-			      //   type: 'success',
-			      //   message: `Your email is:${value}`,
-			      // })
+					OpenDBConnect({key:obj.key,password:value}).then(result => {
+						if (result.State == true) {
+							ElMessage({
+							  type: 'success',
+							  message: `服务器已连接！`,
+							})
+							GetServerList();
+						} else {
+							ElMessage.error(result.Message)
+						}
+					})
+					// obj.children = [{
+					// 	children: null,
+					// 	conState: true,
+					// 	key: "dead4be5-110d-4fde-9e65-c52f85b480b9111",
+					// 	label: "base_basic",
+					// 	obj_type: "db",
+					// }]
+
 			    })
 			    .catch(() => {
 			      ElMessage({
@@ -181,14 +190,34 @@
 			      })
 			    })
 		}else{
-			
+			OpenDBConnect({key:obj.key}).then(result => {
+				if (result.State == true) {
+					ElMessage({
+					  type: 'success',
+					  message: `服务器已连接！`,
+					})
+					GetServerList();
+				} else {
+					ElMessage.error(result.Message)
+				}
+			})
 		}
-		obj.conState = true;
 	}
 
 	const closeDB = (obj) => {
 		console.log("关闭按钮点击事件:", obj)
-		obj.conState = false;
+		//obj.conState = false;
+		CloseDBConnect(obj.key).then(result => {
+			if (result.State == true) {
+				ElMessage({
+				  type: 'success',
+				  message: `连接已断开！`,
+				})
+				GetServerList();
+			} else {
+				ElMessage.error(result.Message)
+			}
+		})
 	}
 
 	const refresh = (obj) => {

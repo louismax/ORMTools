@@ -4,6 +4,8 @@ import {main} from '../models';
 
 export function AddServerConfig(arg1:main.ServerConfig):Promise<any>;
 
+export function CloseDBConnect(arg1:string):Promise<any>;
+
 export function DeleteServerConfig(arg1:string):Promise<any>;
 
 export function EditServerConfig(arg1:main.ServerConfig):Promise<any>;

@@ -17,14 +17,12 @@ func NewApp() *App {
 	return &App{}
 }
 
-var serverDataPath string
-var ServerConfigMap map[string]ServerConfig
-
 // startup is called when the app starts. The context is saved
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
 	serverDataPath = AppDataPath + `\server.dat`
 	ServerConfigMap = make(map[string]ServerConfig)
+	ServerConnMap = make(map[string]ServerConn)
 	if ok, _ := PathExists(serverDataPath); !ok {
 		file, err := os.OpenFile(serverDataPath, os.O_WRONLY|os.O_CREATE, 0666)
 		if err != nil {

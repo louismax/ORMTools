@@ -6,6 +6,10 @@ export function AddServerConfig(arg1) {
   return window['go']['main']['App']['AddServerConfig'](arg1);
 }
 
+export function CloseDBConnect(arg1) {
+  return window['go']['main']['App']['CloseDBConnect'](arg1);
+}
+
 export function DeleteServerConfig(arg1) {
   return window['go']['main']['App']['DeleteServerConfig'](arg1);
 }
