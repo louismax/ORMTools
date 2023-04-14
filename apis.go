@@ -11,6 +11,8 @@ import (
 	"golang.org/x/crypto/ssh"
 	"gorm.io/gorm"
 	"os"
+	"sort"
+	"time"
 )
 
 func (a *App) GetUserAppDataPath(name string) string {
@@ -24,10 +26,9 @@ func (a *App) GetServerConfigList() interface{} {
 		tmp := TreeData{
 			Key:          v.Key,
 			Label:        v.LocalName,
-			Children:     nil,
-			ConState:     false,
 			ObjType:      constant.Connect,
 			HasRecordPwd: v.HasRecordPwd,
+			CreateDate:   v.CreateDate,
 		}
 		if _, ok := ServerConnMap[v.Key]; ok {
 			tmp.ConState = true
@@ -35,7 +36,9 @@ func (a *App) GetServerConfigList() interface{} {
 		}
 		tree = append(tree, tmp)
 	}
-
+	sort.Slice(tree, func(i, j int) bool {
+		return tree[i].CreateDate.Unix() < tree[j].CreateDate.Unix()
+	})
 	return a.ReturnSuccess(tree)
 }
 
@@ -72,6 +75,7 @@ func (a *App) AddServerConfig(req ServerConfig) interface{} {
 		}
 	}
 	req.Key = uuid.New().String()
+	req.CreateDate = time.Now()
 	aesPwd, err := helpers.EncryptByAes([]byte(req.Password))
 	if err != nil {
 		runtime.LogErrorf(a.ctx, "AES加密失败,err:%+v", err)
@@ -108,6 +112,7 @@ func (a *App) EditServerConfig(req ServerConfig) interface{} {
 	if _, ok := ServerConfigMap[req.Key]; !ok {
 		return a.ReturnError("配置不存在或已删除，请重启应用后重试!")
 	}
+	req.CreateDate = ServerConfigMap[req.Key].CreateDate
 	aesPwd, err := helpers.EncryptByAes([]byte(req.Password))
 	if err != nil {
 		runtime.LogErrorf(a.ctx, "AES加密失败,err:%+v", err)
@@ -132,7 +137,6 @@ func (a *App) EditServerConfig(req ServerConfig) interface{} {
 		_ = file.Close()
 	}()
 	encoder := gob.NewEncoder(file)
-	fmt.Printf("%+v", ServerConfigMap)
 	err = encoder.Encode(ServerConfigMap)
 	if err != nil {
 		runtime.LogErrorf(a.ctx, "gob编码错误,err:%+v", err)

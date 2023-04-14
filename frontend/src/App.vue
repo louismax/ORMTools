@@ -79,6 +79,26 @@
 
 	.leftAside {
 		min-width: 320px;
+		margin-bottom: 10px;
+		
+		&::-webkit-scrollbar {
+			width: 8px;
+		}
+		
+		&::-webkit-scrollbar-track {
+			background: rgb(239, 239, 239);
+			border-radius: 2px;
+		}
+		
+		&::-webkit-scrollbar-thumb {
+			background: #bfbfbf;
+			border-radius: 10px;
+		}
+		
+		&::-webkit-scrollbar-thumb:hover {
+			background: #7d7d7d;
+		}
+		
 	}
 
 	.rightMain {

@@ -103,8 +103,8 @@
 			<el-form-item label="用户名" prop="username">
 				<el-input v-model="FormData.username" placeholder="root" />
 			</el-form-item>
-			<el-form-item label="密码" prop="password">
-				<el-input type="password" show-password v-model="FormData.password" />
+			<el-form-item label="密码"  prop="password">
+				<el-input type="password" :disabled="!FormData.has_record_pwd" show-password v-model="FormData.password" />
 			</el-form-item>
 			<el-form-item label="记住密码">
 				<el-switch v-model="FormData.has_record_pwd" />
@@ -206,10 +206,6 @@
 		SuccessFilled,
 	} from '@element-plus/icons-vue'
 	import 'element-plus/theme-chalk/display.css'
-	// import {
-	// 	defineExpose,
-	// 	defineEmits
-	// } from 'vue'
 	import {
 		AddServerConfig,
 		GetServerConfigList,
@@ -232,7 +228,7 @@
 		port: "",
 		username: "",
 		password: "",
-		has_record_pwd: false,
+		has_record_pwd: true,
 		hasUseSSH: false,
 		ssh_host: "",
 		ssh_port: "",
@@ -248,7 +244,14 @@
 	defineExpose({
 		OpenConfigEdit
 	})
-
+	const checkPassword = (rule, value, callback) => {
+		if (FormData.has_record_pwd) {
+			if (value == "") {
+				return callback(new Error("请输入登录密码！"));
+			}
+		}
+		return callback();
+	};
 	const checkSSHHost = (rule, value, callback) => {
 		if (FormData.hasUseSSH) {
 			if (value == "") {
@@ -292,10 +295,6 @@
 		return callback();
 	};
 	const rules = reactive({
-		local_name: [{
-			required: true,
-			message: '请输入连接名'
-		}],
 		dbType: [{
 			required: true,
 			message: '请选择数据库类型 ',
@@ -315,7 +314,8 @@
 		}],
 		password: [{
 			required: true,
-			message: '请输入登录密码'
+			validator: checkPassword,
+			trigger: 'blur'
 		}],
 		ssh_host: [{
 			required: true,
