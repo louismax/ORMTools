@@ -3,6 +3,7 @@ package main
 import (
 	"changeme/dbTools"
 	"fmt"
+	"strings"
 	"testing"
 )
 
@@ -73,10 +74,31 @@ func TestGorm(t *testing.T) {
 	}
 	//返回数据库统计信息
 	t.Logf("实时数据库统计信息:%+v", sqlDB.Stats())
-	dataBases := make([]string, 0)
-	if err = db.Raw("show databases;").Scan(&dataBases).Error; err != nil {
-		t.Logf("sql执行失败,err:%+v", err)
+	//dataBases := make([]string, 0)
+	//if err = db.Raw("show databases;").Scan(&dataBases).Error; err != nil {
+	//	t.Logf("sql执行失败,err:%+v", err)
+	//	return
+	//}
+	//fmt.Println(dataBases)
+	type TableAction struct {
+		TableName    string
+		TableComment string
+	}
+	tables := make([]TableAction, 0)
+	if err := db.Debug().Select("table_name,table_comment").Table("information_schema.tables").Where("table_schema = ?", "base_auth").Find(&tables).Error; err != nil {
+		t.Logf("数据库查询失败,err:%+v", err)
 		return
 	}
-	fmt.Println(dataBases)
+	fmt.Println(tables)
+}
+
+func TestString(t *testing.T) {
+	srcString := "This a string"
+	destString := "this a string"
+
+	if strings.Compare(srcString, destString) == 0 {
+		fmt.Println("Equals")
+	} else {
+		fmt.Println("Not Equals")
+	}
 }

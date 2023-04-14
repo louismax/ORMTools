@@ -12,6 +12,7 @@ import (
 	"gorm.io/gorm"
 	"os"
 	"sort"
+	"strings"
 	"time"
 )
 
@@ -32,7 +33,17 @@ func (a *App) GetServerConfigList() interface{} {
 		}
 		if _, ok := ServerConnMap[v.Key]; ok {
 			tmp.ConState = true
-			tmp.Children = ServerConnMap[v.Key].Children
+			for _, db := range ServerConnMap[v.Key].Children {
+				if len(db.Children) > 0 {
+					sort.Slice(db.Children, func(i, j int) bool {
+						return strings.Compare(db.Children[i].Label, db.Children[j].Label) < 0
+					})
+				}
+				tmp.Children = append(tmp.Children, db)
+			}
+			sort.Slice(tmp.Children, func(i, j int) bool {
+				return strings.Compare(tmp.Children[i].Label, tmp.Children[j].Label) < 0
+			})
 		}
 		tree = append(tree, tmp)
 	}
@@ -300,14 +311,24 @@ func (a *App) OpenDBConnect(req ServerConfig) interface{} {
 	dbTree := make([]TreeData, 0)
 	for _, v := range dataBases {
 		dbTree = append(dbTree, TreeData{
-			Key:      v,
-			Label:    v,
-			Children: nil,
-			ObjType:  "db",
+			Key:          uuid.New().String(),
+			Label:        v,
+			Children:     nil,
+			ObjType:      "db",
+			ParentSvrKey: req.Key,
 		})
 	}
+	sort.Slice(dbTree, func(i, j int) bool {
+		return strings.Compare(dbTree[i].Label, dbTree[j].Label) < 0
+	})
+
 	svrCon := ServerConnMap[req.Key]
-	svrCon.Children = dbTree
+	dbTmp := make(map[string]TreeData)
+	for _, v := range dbTree {
+		dbTmp[v.Label] = v
+	}
+	svrCon.Children = dbTmp
+
 	ServerConnMap[req.Key] = svrCon
 	return a.ReturnSuccess(dbTree)
 }
@@ -330,4 +351,72 @@ func (a *App) CloseDBConnect(key string) interface{} {
 	delete(ServerConnMap, key)
 
 	return a.ReturnSuccess("操作成功")
+}
+
+func (a *App) QueryTableList(key, dbName string) interface{} {
+	if _, ok := ServerConnMap[key]; !ok {
+		return a.ReturnError("连接不存在或已关闭，请重新连接后重试！")
+	}
+	type TableAction struct {
+		TableName    string
+		TableComment string
+	}
+	tables := make([]TableAction, 0)
+	if err := ServerConnMap[key].DB.Debug().Select("table_name,table_comment").Table("information_schema.tables").Where("table_schema = ?", dbName).Find(&tables).Error; err != nil {
+		runtime.LogErrorf(a.ctx, "数据库查询失败,err:%+v", err)
+		return a.ReturnError("数据库查询失败,ERR:" + err.Error())
+	}
+	dbTree := make([]TreeData, 0)
+	for _, v := range tables {
+		dbTree = append(dbTree, TreeData{
+			Key:          uuid.New().String(),
+			Label:        v.TableName,
+			Comment:      v.TableComment,
+			Children:     nil,
+			ObjType:      "table",
+			ParentSvrKey: key,
+			ParentDBKey:  ServerConnMap[key].Children[dbName].Key,
+		})
+	}
+	sort.Slice(dbTree, func(i, j int) bool {
+		return strings.Compare(dbTree[i].Label, dbTree[j].Label) < 0
+	})
+
+	svrCon := ServerConnMap[key]
+	dbInfo := svrCon.Children[dbName]
+	dbInfo.Children = dbTree
+	svrCon.Children[dbName] = dbInfo
+	ServerConnMap[key] = svrCon
+
+	return a.ReturnSuccess(dbTree)
+}
+
+func (a *App) RefreshDBConnect(key string) interface{} {
+	dataBases := make([]string, 0)
+	if err := ServerConnMap[key].DB.Debug().Raw("show databases;").Scan(&dataBases).Error; err != nil {
+		runtime.LogErrorf(a.ctx, "数据库查询失败,err:%+v", err)
+		return a.ReturnError("数据库查询失败,ERR:" + err.Error())
+	}
+	dbTree := make([]TreeData, 0)
+	for _, v := range dataBases {
+		dbTree = append(dbTree, TreeData{
+			Key:          uuid.New().String(),
+			Label:        v,
+			Children:     nil,
+			ObjType:      "db",
+			ParentSvrKey: key,
+		})
+	}
+	sort.Slice(dbTree, func(i, j int) bool {
+		return strings.Compare(dbTree[i].Label, dbTree[j].Label) < 0
+	})
+
+	svrCon := ServerConnMap[key]
+	dbTmp := make(map[string]TreeData)
+	for _, v := range dbTree {
+		dbTmp[v.Label] = v
+	}
+	svrCon.Children = dbTmp
+	ServerConnMap[key] = svrCon
+	return a.ReturnSuccess(dbTree)
 }

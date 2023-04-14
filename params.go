@@ -33,7 +33,7 @@ type ServerConfig struct {
 type ServerConn struct {
 	DB        *gorm.DB
 	SshClient *ssh.Client
-	Children  []TreeData `json:"children"`
+	Children  map[string]TreeData `json:"children"`
 }
 
 func (a *App) ReturnSuccess(Data interface{}) map[string]interface{} {
@@ -53,9 +53,12 @@ func (a *App) ReturnError(msg string) map[string]interface{} {
 type TreeData struct {
 	Key          string     `json:"key"`
 	Label        string     `json:"label"`
+	Comment      string     `json:"comment"`
 	Children     []TreeData `json:"children"`
 	ConState     bool       `json:"conState"`
 	ObjType      string     `json:"obj_type"`
 	HasRecordPwd bool       `json:"has_record_pwd"`
 	CreateDate   time.Time  `json:"create_date"`
+	ParentSvrKey string     `json:"parentSvrKey"`
+	ParentDBKey  string     `json:"parentDBKey"`
 }

@@ -1,7 +1,7 @@
 <template>
 	<el-tree :data="dataSource" node-key="key" empty-text="暂无数据库配置" :highlight-current="true"
-		:expand-on-click-node="false" :check-on-click-node="true" @node-click="handleNodeClick"
-		@current-change="currentNodeChange" default-expand-all icon-class="none" ref="treeForm">
+		:expand-on-click-node="true" :check-on-click-node="true" @node-click="handleNodeClick"
+		default-expand-all icon-class="none" ref="treeForm">
 		<template #default="{ node, data }">
 			<span class="custom-tree-node">
 				<span class="tree-node-title">
@@ -61,8 +61,8 @@
 						</el-button>
 					</el-tooltip>
 
-					<el-tooltip v-if="data.conState" content="重载该数据库库表结构" placement="bottom" effect="light">
-						<el-button :text="true" style="width: 27px;height: 27px;margin: 0;" @click.stop="refresh(data)">
+					<el-tooltip v-if="data.conState" content="重载库表结构" placement="bottom" effect="light">
+						<el-button :text="true" style="width: 27px;height: 27px;margin: 0;" @click.stop="refresh($event,data)">
 							<el-icon size="18">
 								<Refresh />
 							</el-icon>
@@ -90,11 +90,18 @@
 							</el-button>
 						</div>
 					</el-tooltip>
-
-
-
 					<!-- <a style="margin-left: 8px" @click="remove(node, data)"> Delete </a> -->
 				</span>
+				<span v-if="node.isCurrent && data.obj_type == 'db'">
+					<el-tooltip content="重载库表结构" placement="bottom" effect="light">
+						<el-button :text="true" style="width: 27px;height: 27px;margin: 0;" @click.stop="refresh($event,data)">
+							<el-icon size="18">
+								<Refresh />
+							</el-icon>
+						</el-button>
+					</el-tooltip>
+				</span>
+				
 			</span>
 		</template>
 	</el-tree>
@@ -119,6 +126,8 @@
 		DeleteServerConfig,
 		OpenDBConnect,
 		CloseDBConnect,
+		QueryTableList,
+		RefreshDBConnect,
 	} from '../../wailsjs/go/main/App'
 
 
@@ -145,16 +154,25 @@
 
 	}
 
-	const currentNodeChange = (data, node) => {
-		// console.log("节点选中状态变化", data, node)
-	}
-
 	const handleNodeClick = (data, node, tn, e) => {
-		//console.log(node)
+		console.log("点击节点:", data)
+		if(data.obj_type == "db" && data.children == null){
+			console.log(node)
+			QueryTableList(data.parentSvrKey,data.label).then(result => {
+				if (result.State == true) {
+					data.children = result.Data;
+					//GetServerList();
+					//treeForm.value.setCurrentNode(node)
+					//node.expanded = true
+				} else {
+					ElMessage.error(result.Message)
+				}
+			})
+		}
 	}
 
 	const openDB = (obj) => {
-		console.log("打开连接按钮点击事件:", obj)
+		//console.log("打开连接按钮点击事件:", obj)
 		if(obj.has_record_pwd == false){
 			ElMessageBox.prompt('请输入数据库服务器登录用户密码以继续操作:', '身份验证', {
 			    confirmButtonText: '确认',
@@ -165,23 +183,18 @@
 			    .then(({ value }) => {
 					OpenDBConnect({key:obj.key,password:value}).then(result => {
 						if (result.State == true) {
+							obj.conState = true;
+							obj.children = result.Data;
 							ElMessage({
 							  type: 'success',
 							  message: `服务器已连接！`,
 							})
-							GetServerList();
+							//GetServerList();
+							
 						} else {
 							ElMessage.error(result.Message)
 						}
 					})
-					// obj.children = [{
-					// 	children: null,
-					// 	conState: true,
-					// 	key: "dead4be5-110d-4fde-9e65-c52f85b480b9111",
-					// 	label: "base_basic",
-					// 	obj_type: "db",
-					// }]
-
 			    })
 			    .catch(() => {
 			      ElMessage({
@@ -196,7 +209,9 @@
 					  type: 'success',
 					  message: `服务器已连接！`,
 					})
-					GetServerList();
+					//GetServerList();
+					obj.conState = true;
+					obj.children = result.Data;
 				} else {
 					ElMessage.error(result.Message)
 				}
@@ -205,7 +220,7 @@
 	}
 
 	const closeDB = (obj) => {
-		console.log("关闭按钮点击事件:", obj)
+		//console.log("关闭按钮点击事件:", obj)
 		//obj.conState = false;
 		CloseDBConnect(obj.key).then(result => {
 			if (result.State == true) {
@@ -220,12 +235,45 @@
 		})
 	}
 
-	const refresh = (obj) => {
+	const refresh = (e,obj) => {
+		// 添加失去焦点事件
+		let target = e.target;
+		console.log(e)
+		if (target.nodeName === "BUTTON" || target.nodeName === "SPAN") {
+			target.parentNode.blur();
+		}else if (target.nodeName === "I" ) {
+			target.parentNode.parentNode.blur();
+		}else if (target.nodeName === "svg" ) {
+			target.parentNode.parentNode.parentNode.blur();
+		}else if (target.nodeName === "path" ) {
+			target.parentNode.parentNode.parentNode.parentNode.blur();
+		}
+		target.blur();
+		
 		console.log("刷新按钮点击事件:", obj)
+		if(obj.obj_type == "connect"){
+			RefreshDBConnect(obj.key).then(result => {
+				if (result.State == true) {
+					//GetServerList();
+					obj.children = result.Data;
+				} else {
+					ElMessage.error(result.Message)
+				}
+			})
+		}else if (obj.obj_type == "db"){
+			QueryTableList(obj.parentSvrKey,obj.label).then(result => {
+				if (result.State == true) {
+					obj.children = result.Data;
+					//GetServerList();
+				} else {
+					ElMessage.error(result.Message)
+				}
+			})
+		}
 	}
 
 	const editDB = (obj) => {
-		console.log("编辑按钮点击事件:", obj)
+		//console.log("编辑按钮点击事件:", obj)
 		emit('openServerConfigEdit', obj.key);
 	}
 

@@ -34,6 +34,14 @@ export function OpenDBConnect(arg1) {
   return window['go']['main']['App']['OpenDBConnect'](arg1);
 }
 
+export function QueryTableList(arg1, arg2) {
+  return window['go']['main']['App']['QueryTableList'](arg1, arg2);
+}
+
+export function RefreshDBConnect(arg1) {
+  return window['go']['main']['App']['RefreshDBConnect'](arg1);
+}
+
 export function ReturnError(arg1) {
   return window['go']['main']['App']['ReturnError'](arg1);
 }
