@@ -7,10 +7,11 @@
 			</el-header>
 			<el-container class="MainBox">
 				<el-aside class="leftAside">
-					<dbTree ref="dbTreeRef" @openServerConfigEdit="openServerConfigEdit" />
+					<dbTree ref="dbTreeRef" @openServerConfigEdit="openServerConfigEdit" @GetTableInfo="GetTableInfoByToHome" />
 				</el-aside>
 				<DragAdjustWidth />
-				<el-main class="rightMain">Main
+				<el-main class="rightMain">
+					<home ref="homeRef" />
 					<!-- <div id="result" class="result">{{ data.resultText }}</div> -->
 				</el-main>
 			</el-container>
@@ -23,6 +24,9 @@
 	import Home from './components/Home.vue'
 	import Header from './components/Header.vue'
 	import dbTree from './components/dbTree.vue'
+	// import 'highlight.js/styles/atom-one-light.css?inline'
+	// import 'highlight.js/styles/atom-one-dark.css?inline'
+	
 	import {
 		ref,
 		reactive
@@ -33,6 +37,7 @@
 
 	const dbTreeRef = ref()
 	const headerRef = ref()
+	const homeRef = ref()
 
 	const GetServerListToTree = () => {
 		dbTreeRef.value.GetServerList()
@@ -40,6 +45,10 @@
 
 	const openServerConfigEdit = (key) => {
 		headerRef.value.OpenConfigEdit(key)
+	}
+	
+	const GetTableInfoByToHome = (key,dbName,tableName,tbComment) => {
+		homeRef.value.GetTableInfo(key,dbName,tableName,tbComment)
 	}
 
 
@@ -56,7 +65,17 @@
 	// }
 </script>
 
-<style>
+<style lang="scss">
+	@use "sass:meta";
+
+	
+	html[data-code-theme="light"] {
+	  @include meta.load-css("highlight.js/styles/atom-one-light.css");
+	}
+	html[data-code-theme="dark"] {
+	  @include meta.load-css("highlight.js/styles/atom-one-dark.css");
+	}
+	
 	.container {
 		display: flex;
 		flex-flow: column nowrap;

@@ -12,6 +12,7 @@ import (
 	"gorm.io/gorm"
 	"os"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -259,7 +260,7 @@ func (a *App) OpenDBConnect(req ServerConfig) interface{} {
 		}
 		dc.Password = string(decPwd)
 	}
-	fmt.Printf("%+v", dc)
+	//fmt.Printf("%+v", dc)
 
 	if ServerConfigMap[req.Key].HasUseSSH {
 		sc := dbTools.SSH{
@@ -302,6 +303,7 @@ func (a *App) OpenDBConnect(req ServerConfig) interface{} {
 			SshClient: nil,
 		}
 	}
+
 	dataBases := make([]string, 0)
 	if err := ServerConnMap[req.Key].DB.Debug().Raw("show databases;").Scan(&dataBases).Error; err != nil {
 		runtime.LogErrorf(a.ctx, "数据库查询失败,err:%+v", err)
@@ -356,10 +358,6 @@ func (a *App) QueryTableList(key, dbName string) interface{} {
 	if _, ok := ServerConnMap[key]; !ok {
 		return a.ReturnError("连接不存在或已关闭，请重新连接后重试！")
 	}
-	type TableAction struct {
-		TableName    string
-		TableComment string
-	}
 	tables := make([]TableAction, 0)
 	if err := ServerConnMap[key].DB.Debug().Select("table_name,table_comment").Table("information_schema.tables").Where("table_schema = ?", dbName).Find(&tables).Error; err != nil {
 		runtime.LogErrorf(a.ctx, "数据库查询失败,err:%+v", err)
@@ -374,13 +372,12 @@ func (a *App) QueryTableList(key, dbName string) interface{} {
 			Children:     nil,
 			ObjType:      "table",
 			ParentSvrKey: key,
-			ParentDBKey:  ServerConnMap[key].Children[dbName].Key,
+			ParentDBKey:  ServerConnMap[key].Children[dbName].Label,
 		})
 	}
 	sort.Slice(dbTree, func(i, j int) bool {
 		return strings.Compare(dbTree[i].Label, dbTree[j].Label) < 0
 	})
-
 	svrCon := ServerConnMap[key]
 	dbInfo := svrCon.Children[dbName]
 	dbInfo.Children = dbTree
@@ -418,4 +415,54 @@ func (a *App) RefreshDBConnect(key string) interface{} {
 	svrCon.Children = dbTmp
 	ServerConnMap[key] = svrCon
 	return a.ReturnSuccess(dbTree)
+}
+
+func (a *App) QueryTableFieldList(key, dbKey, tableName, tbComment string) interface{} {
+	if _, ok := ServerConnMap[key]; !ok {
+		return a.ReturnError("连接不存在或已关闭，请重新连接后重试！")
+	}
+	if _, ok := ServerConnMap[key].Children[dbKey]; !ok {
+		return a.ReturnError("数据库不存在或已关闭，请重新连接后重试！")
+	}
+	tableColumn := make([]TableColumnAction, 0)
+	if err := ServerConnMap[key].DB.Debug().
+		Select("column_name,ordinal_position,column_default,is_nullable,data_type,column_comment").
+		Table("information_schema.COLUMNS").
+		Where("table_schema = ? AND  table_name = ?", ServerConnMap[key].Children[dbKey].Label, tableName).
+		Find(&tableColumn).Error; err != nil {
+		runtime.LogErrorf(a.ctx, "表结构查询失败,err:%+v", err)
+		return a.ReturnError("表结构查询失败,ERR:" + err.Error())
+	}
+
+	maxNameLen := 0
+	maxTypeLen := 0
+	maxTagLen := 0
+	sm := make([]StructColumnAction, 0)
+	for _, v := range tableColumn {
+		tmp := StructColumnAction{
+			SName:    camelString(v.ColumnName),
+			SType:    v.DataType,
+			STag:     fmt.Sprintf("%#q", fmt.Sprintf("json:%q", v.ColumnName)),
+			SComment: "// " + v.ColumnComment,
+		}
+		if len(tmp.SName) > maxNameLen {
+			maxNameLen = len(tmp.SName)
+		}
+		if len(tmp.SType) > maxTypeLen {
+			maxTypeLen = len(tmp.SType)
+		}
+		if len(tmp.STag) > maxTagLen {
+			maxTagLen = len(tmp.STag)
+		}
+		sm = append(sm, tmp)
+	}
+
+	str := fmt.Sprintf("//%s %s \n", camelString(tableName), tbComment)
+	str += fmt.Sprintf("type %s struct{\n", camelString(tableName))
+	for _, v := range sm {
+		str += fmt.Sprintf("\t%-"+strconv.Itoa(maxNameLen)+"s %-"+strconv.Itoa(maxTypeLen)+"s %-"+strconv.Itoa(maxTagLen)+"s %s\n", v.SName, v.SType, v.STag, v.SComment)
+	}
+	str += "}\n"
+
+	return a.ReturnSuccess(str)
 }

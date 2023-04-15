@@ -1,4 +1,12 @@
 import {createApp} from 'vue'
 import App from './App.vue'
+import hljs from 'highlight.js/lib/core';
+import javascript from 'highlight.js/lib/languages/javascript';
+import golang from 'highlight.js/lib/languages/go';
+import hljsVuePlugin from "@highlightjs/vue-plugin";
+hljs.registerLanguage('javascript', javascript);
+hljs.registerLanguage('golang', golang);
 
-createApp(App).mount('#app')
+const app = createApp(App)
+app.use(hljsVuePlugin)
+app.mount('#app')

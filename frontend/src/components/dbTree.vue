@@ -110,11 +110,6 @@
 
 <script setup>
 	import {
-		ref,
-		// defineExpose,
-		// defineEmits,
-	} from 'vue';
-	import {
 		Coin,
 		Delete,
 		Edit,
@@ -131,7 +126,7 @@
 	} from '../../wailsjs/go/main/App'
 
 
-	const emit = defineEmits(['openServerConfigEdit'])
+	const emit = defineEmits(['openServerConfigEdit','GetTableInfo'])
 
 	defineExpose({
 		GetServerList
@@ -151,7 +146,6 @@
 				ElMessage.error(result.Message)
 			}
 		})
-
 	}
 
 	const handleNodeClick = (data, node, tn, e) => {
@@ -181,6 +175,8 @@
 					ElMessage.error(result.Message)
 				}
 			})
+		}else if(data.obj_type == "table"){
+			emit('GetTableInfo', data.parentSvrKey,data.parentDBKey,data.label,data.comment);
 		}
 	}
 

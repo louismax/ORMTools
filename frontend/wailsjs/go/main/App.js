@@ -30,6 +30,10 @@ export function OpenDBConnect(arg1) {
   return window['go']['main']['App']['OpenDBConnect'](arg1);
 }
 
+export function QueryTableFieldList(arg1, arg2, arg3, arg4) {
+  return window['go']['main']['App']['QueryTableFieldList'](arg1, arg2, arg3, arg4);
+}
+
 export function QueryTableList(arg1, arg2) {
   return window['go']['main']['App']['QueryTableList'](arg1, arg2);
 }

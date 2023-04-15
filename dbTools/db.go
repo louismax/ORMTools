@@ -11,6 +11,7 @@ import (
 	"gorm.io/gorm/schema"
 	"io/ioutil"
 	"net"
+	"time"
 )
 
 type Dialer struct {
@@ -101,6 +102,11 @@ func SSHOpenDB(sc SSH, dc MySQL) (*gorm.DB, *ssh.Client, error) {
 	if err != nil {
 		return nil, nil, err
 	}
+	sqlDB, err := db.DB()
+	if err != nil {
+		return nil, nil, err
+	}
+	sqlDB.SetConnMaxLifetime(30 * time.Second)
 	return db, dial, nil
 }
 
@@ -110,5 +116,11 @@ func OpenDB(dc MySQL) (*gorm.DB, error) {
 	if err != nil {
 		return nil, err
 	}
+	sqlDB, err := db.DB()
+	if err != nil {
+		return nil, err
+	}
+	sqlDB.SetConnMaxLifetime(30 * time.Second)
+
 	return db, nil
 }

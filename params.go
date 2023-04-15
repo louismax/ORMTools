@@ -61,3 +61,24 @@ type TreeData struct {
 	ParentSvrKey   string     `json:"parentSvrKey"`
 	ParentDBKey    string     `json:"parentDBKey"`
 }
+
+type TableAction struct {
+	TableName    string
+	TableComment string
+}
+
+type TableColumnAction struct {
+	ColumnName      string
+	OrdinalPosition int64
+	ColumnDefault   string
+	IsNullable      string
+	DataType        string
+	ColumnComment   string
+}
+
+type StructColumnAction struct {
+	SName    string
+	SType    string
+	STag     string
+	SComment string
+}
