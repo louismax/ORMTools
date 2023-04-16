@@ -10,7 +10,6 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 	"golang.org/x/crypto/ssh"
 	"gorm.io/gorm"
-	"os"
 	"sort"
 	"strconv"
 	"strings"
@@ -99,15 +98,15 @@ func (a *App) AddServerConfig(req ServerConfig) interface{} {
 		req.SshPassword = aesSSHPwd
 	}
 	ServerConfigMap[req.Key] = req
-	file, err := os.OpenFile(serverDataPath, os.O_WRONLY|os.O_CREATE, 0666)
-	if err != nil {
-		runtime.LogErrorf(a.ctx, "文件创建失败,err:%+v", err)
-		return a.ReturnError("文件创建失败")
-	}
-	defer func() {
-		_ = file.Close()
-	}()
-	encoder := gob.NewEncoder(file)
+	//file, err := os.OpenFile(serverDataPath, os.O_WRONLY|os.O_CREATE, 0666)
+	//if err != nil {
+	//	runtime.LogErrorf(a.ctx, "文件创建失败,err:%+v", err)
+	//	return a.ReturnError("文件创建失败")
+	//}
+	//defer func() {
+	//	_ = file.Close()
+	//}()
+	encoder := gob.NewEncoder(svrDatFile)
 	err = encoder.Encode(ServerConfigMap)
 	if err != nil {
 		runtime.LogErrorf(a.ctx, "gob编码错误,err:%+v", err)
@@ -136,15 +135,15 @@ func (a *App) EditServerConfig(req ServerConfig) interface{} {
 		req.SshPassword = aesSSHPwd
 	}
 	ServerConfigMap[req.Key] = req
-	file, err := os.OpenFile(serverDataPath, os.O_WRONLY|os.O_CREATE, 0666)
-	if err != nil {
-		runtime.LogErrorf(a.ctx, "文件创建失败,err:%+v", err)
-		return a.ReturnError("文件创建失败")
-	}
-	defer func() {
-		_ = file.Close()
-	}()
-	encoder := gob.NewEncoder(file)
+	//file, err := os.OpenFile(serverDataPath, os.O_WRONLY|os.O_CREATE, 0666)
+	//if err != nil {
+	//	runtime.LogErrorf(a.ctx, "文件创建失败,err:%+v", err)
+	//	return a.ReturnError("文件创建失败")
+	//}
+	//defer func() {
+	//	_ = file.Close()
+	//}()
+	encoder := gob.NewEncoder(svrDatFile)
 	err = encoder.Encode(ServerConfigMap)
 	if err != nil {
 		runtime.LogErrorf(a.ctx, "gob编码错误,err:%+v", err)
@@ -159,16 +158,16 @@ func (a *App) DeleteServerConfig(key string) interface{} {
 	}
 	delete(ServerConfigMap, key)
 
-	file, err := os.OpenFile(serverDataPath, os.O_WRONLY|os.O_CREATE, 0666)
-	if err != nil {
-		runtime.LogErrorf(a.ctx, "文件创建失败,err:%+v", err)
-		return a.ReturnError("文件创建失败")
-	}
-	defer func() {
-		_ = file.Close()
-	}()
-	encoder := gob.NewEncoder(file)
-	err = encoder.Encode(ServerConfigMap)
+	//file, err := os.OpenFile(serverDataPath, os.O_WRONLY|os.O_CREATE, 0666)
+	//if err != nil {
+	//	runtime.LogErrorf(a.ctx, "文件创建失败,err:%+v", err)
+	//	return a.ReturnError("文件创建失败")
+	//}
+	//defer func() {
+	//	_ = file.Close()
+	//}()
+	encoder := gob.NewEncoder(svrDatFile)
+	err := encoder.Encode(ServerConfigMap)
 	if err != nil {
 		runtime.LogErrorf(a.ctx, "gob编码错误,err:%+v", err)
 		return a.ReturnError("gob编码错误")
