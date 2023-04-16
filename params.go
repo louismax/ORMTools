@@ -5,7 +5,6 @@ import (
 	"gorm.io/gorm"
 )
 
-var serverDataPath string
 var ServerConfigMap map[string]ServerConfig
 var ServerConnMap map[string]ServerConn
 

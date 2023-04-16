@@ -7,3 +7,8 @@ const (
 	Password string = "PASSWORD"
 	Key      string = "KEY"
 )
+
+const (
+	ThemeLight string = "Light"
+	ThemeDark  string = "Dark"
+)
