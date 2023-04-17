@@ -175,7 +175,7 @@ func DBFieldTypeToStructFieldType(t string) string {
 	case constant.MySqlBigInt:
 		r = "int64"
 	default:
-		r = "???(请手动添加字段转换规则)"
+		r = "未知(请手动添加字段转换规则)"
 	}
 	return r
 }
