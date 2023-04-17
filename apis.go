@@ -10,6 +10,7 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 	"golang.org/x/crypto/ssh"
 	"gorm.io/gorm"
+	"os"
 	"sort"
 	"strconv"
 	"strings"
@@ -98,20 +99,20 @@ func (a *App) AddServerConfig(req ServerConfig) interface{} {
 		req.SshPassword = aesSSHPwd
 	}
 	ServerConfigMap[req.Key] = req
-	//file, err := os.OpenFile(serverDataPath, os.O_WRONLY|os.O_CREATE, 0666)
-	//if err != nil {
-	//	runtime.LogErrorf(a.ctx, "文件创建失败,err:%+v", err)
-	//	return a.ReturnError("文件创建失败")
-	//}
-	//defer func() {
-	//	_ = file.Close()
-	//}()
+
+	_ = svrDatFile.Close() //先关闭文件占用
+	svrDatFile, err = os.OpenFile(serverDataPath, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0666)
+	if err != nil {
+		runtime.LogErrorf(a.ctx, "文件创建失败,err:%+v", err)
+		return a.ReturnError("文件创建失败")
+	}
 	encoder := gob.NewEncoder(svrDatFile)
 	err = encoder.Encode(ServerConfigMap)
 	if err != nil {
 		runtime.LogErrorf(a.ctx, "gob编码错误,err:%+v", err)
 		return a.ReturnError("gob编码错误")
 	}
+
 	return a.ReturnSuccess("成功")
 }
 
@@ -135,14 +136,13 @@ func (a *App) EditServerConfig(req ServerConfig) interface{} {
 		req.SshPassword = aesSSHPwd
 	}
 	ServerConfigMap[req.Key] = req
-	//file, err := os.OpenFile(serverDataPath, os.O_WRONLY|os.O_CREATE, 0666)
-	//if err != nil {
-	//	runtime.LogErrorf(a.ctx, "文件创建失败,err:%+v", err)
-	//	return a.ReturnError("文件创建失败")
-	//}
-	//defer func() {
-	//	_ = file.Close()
-	//}()
+
+	_ = svrDatFile.Close() //先关闭文件占用
+	svrDatFile, err = os.OpenFile(serverDataPath, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0666)
+	if err != nil {
+		runtime.LogErrorf(a.ctx, "文件创建失败,err:%+v", err)
+		return a.ReturnError("文件创建失败")
+	}
 	encoder := gob.NewEncoder(svrDatFile)
 	err = encoder.Encode(ServerConfigMap)
 	if err != nil {
@@ -157,17 +157,15 @@ func (a *App) DeleteServerConfig(key string) interface{} {
 		return a.ReturnError("配置不存在或已删除，请重启应用后重试!")
 	}
 	delete(ServerConfigMap, key)
-
-	//file, err := os.OpenFile(serverDataPath, os.O_WRONLY|os.O_CREATE, 0666)
-	//if err != nil {
-	//	runtime.LogErrorf(a.ctx, "文件创建失败,err:%+v", err)
-	//	return a.ReturnError("文件创建失败")
-	//}
-	//defer func() {
-	//	_ = file.Close()
-	//}()
+	var err error
+	_ = svrDatFile.Close() //先关闭文件占用
+	svrDatFile, err = os.OpenFile(serverDataPath, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0666)
+	if err != nil {
+		runtime.LogErrorf(a.ctx, "文件创建失败,err:%+v", err)
+		return a.ReturnError("文件创建失败")
+	}
 	encoder := gob.NewEncoder(svrDatFile)
-	err := encoder.Encode(ServerConfigMap)
+	err = encoder.Encode(ServerConfigMap)
 	if err != nil {
 		runtime.LogErrorf(a.ctx, "gob编码错误,err:%+v", err)
 		return a.ReturnError("gob编码错误")
@@ -309,7 +307,15 @@ func (a *App) OpenDBConnect(req ServerConfig) interface{} {
 		return a.ReturnError("数据库查询失败,ERR:" + err.Error())
 	}
 	dbTree := make([]TreeData, 0)
+	hideDB := make(map[string]interface{})
+	for _, v := range UserConfig[constant.ConfigKeyHideDBList].([]string) {
+		hideDB[v] = 1
+	}
+
 	for _, v := range dataBases {
+		if _, ok := hideDB[v]; ok {
+			continue
+		}
 		dbTree = append(dbTree, TreeData{
 			Key:          uuid.New().String(),
 			Label:        v,

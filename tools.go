@@ -1,6 +1,7 @@
 package main
 
 import (
+	"changeme/constant"
 	"encoding/json"
 	"github.com/mitchellh/go-homedir"
 	"log"
@@ -162,4 +163,19 @@ func camelString(s string) string {
 		data = append(data, d)
 	}
 	return string(data[:])
+}
+
+func DBFieldTypeToStructFieldType(t string) string {
+	userFileRole := UserConfig[constant.ConfigKeyMySqlToStructFieldType].(map[string]string)
+	if _, ok := userFileRole[t]; ok {
+		return userFileRole[t]
+	}
+	r := ""
+	switch t {
+	case constant.MySqlBigInt:
+		r = "int64"
+	default:
+		r = "???(请手动添加字段转换规则)"
+	}
+	return r
 }
