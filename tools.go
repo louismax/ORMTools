@@ -3,10 +3,12 @@ package main
 import (
 	"changeme/constant"
 	"encoding/json"
+	"fmt"
 	"github.com/mitchellh/go-homedir"
 	"log"
 	"os"
 	"strconv"
+	"strings"
 )
 
 var AppDataPath string
@@ -171,11 +173,41 @@ func DBFieldTypeToStructFieldType(t string) string {
 		return userFileRole[t]
 	}
 	r := ""
-	switch t {
+	switch strings.ToLower(t) {
+	case constant.MySqlTinyInt:
+		r = "int8"
+	case constant.MySqlSmallInt:
+		r = "int16"
+	case constant.MySqlMediumInt:
+		r = "int32"
+	case constant.MySqlInteger:
+		r = "int"
+	case constant.MySqlInt:
+		r = "int"
 	case constant.MySqlBigInt:
 		r = "int64"
+	case constant.MysqlFloat:
+		r = "float32"
+	case constant.MysqlDouble:
+		r = "float64"
+	case constant.MySqlChar:
+		r = "string"
+	case constant.MySqlVarChar:
+		r = "string"
+	case constant.MySqlText:
+		r = "string"
+	case constant.MySqlLongText:
+		r = "string"
+	case constant.MySqlBlob:
+		r = "string"
+	case constant.MySqlLongBlob:
+		r = "string"
+	case constant.MySqlDateTime:
+		r = "time.Time"
+	case constant.MySqlTimeStamp:
+		r = "time.Time"
 	default:
-		r = "未知(请手动添加字段转换规则)"
+		r = fmt.Sprintf("未定义%s(请手动添加字段转换规则)", t)
 	}
 	return r
 }

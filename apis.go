@@ -446,7 +446,7 @@ func (a *App) QueryTableFieldList(key, dbKey, tableName, tbComment string) inter
 	for _, v := range tableColumn {
 		tmp := StructColumnAction{
 			SName:    camelString(v.ColumnName),
-			SType:    v.DataType,
+			SType:    DBFieldTypeToStructFieldType(v.DataType),
 			STag:     fmt.Sprintf("%#q", fmt.Sprintf("json:%q", v.ColumnName)),
 			SComment: "// " + v.ColumnComment,
 		}

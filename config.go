@@ -11,19 +11,9 @@ var DefaultConfig = map[interface{}]interface{}{
 	constant.ConfigKeyHideDBList: []string{
 		"information_schema", "mysql", "performance_schema", "sys",
 	},
-	constant.ConfigKeyHideTableList:       []string{},
-	constant.ConfigKeyHideTableColumnList: []string{},
-	constant.ConfigKeyMySqlToStructFieldType: map[string]string{
-		constant.MySqlBigInt:   "int64",
-		constant.MySqlTinyInt:  "uint",
-		constant.MySqlInt:      "int",
-		constant.MySqlChar:     "string",
-		constant.MySqlVarChar:  "string",
-		constant.MySqlText:     "string",
-		constant.MySqlDate:     "time.Time",
-		constant.MySqlDateTime: "time.Time",
-		constant.MySqlDouble:   "float64",
-	},
+	constant.ConfigKeyHideTableList:          []string{},
+	constant.ConfigKeyHideTableColumnList:    []string{},
+	constant.ConfigKeyMySqlToStructFieldType: map[string]string{},
 }
 
 var UserConfig = make(map[interface{}]interface{})
