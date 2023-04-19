@@ -77,20 +77,6 @@
 		GetTableInfo
 	})
 
-	// if (hjTag.value == 0) {
-	// 	import('highlight.js/styles/atom-one-dark.css')
-	// } else {
-	// 	import('highlight.js/styles/atom-one-light.css')
-	// }
-
-	const aaa = () => {
-		console.log(document.getElementsByTagName('html')[0].dataset)
-		if (document.getElementsByTagName('html')[0].dataset.codeTheme == "light") {
-			document.getElementsByTagName('html')[0].dataset.codeTheme = "dark"
-		} else {
-			document.getElementsByTagName('html')[0].dataset.codeTheme = "light"
-		}
-	}
 
 	const removeTab = (targetName) => {
 		const tabs = editableTabs.value

@@ -6,8 +6,9 @@ import (
 
 var DefaultConfig = map[string]interface{}{
 	constant.ConfigKeyWT:                  constant.ThemeSystemDefault, //主题
-	constant.ConfigKeyHasTableComment:     true,                        //是否显示表备注
-	constant.ConfigKeyHasRewriteTableName: true,                        //是否重写表名
+	constant.ConfigKeyCT:                  "an-old-hope",
+	constant.ConfigKeyHasTableComment:     true, //是否显示表备注
+	constant.ConfigKeyHasRewriteTableName: true, //是否重写表名
 	constant.ConfigKeyHasJsonTag:          true,
 	constant.ConfigKeyHasGormColumnTag:    false,
 	constant.ConfigKeyHideDBList: []string{

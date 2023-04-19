@@ -48,3 +48,7 @@ func main() {
 		println("Error:", err.Error())
 	}
 }
+
+func (a *App) ApiTest(r interface{}) string {
+	return fmt.Sprintf("result:%s", r.(string))
+}

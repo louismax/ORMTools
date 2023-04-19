@@ -6,6 +6,10 @@ export function AddServerConfig(arg1) {
   return window['go']['main']['App']['AddServerConfig'](arg1);
 }
 
+export function ApiTest(arg1) {
+  return window['go']['main']['App']['ApiTest'](arg1);
+}
+
 export function CloseDBConnect(arg1) {
   return window['go']['main']['App']['CloseDBConnect'](arg1);
 }
@@ -16,6 +20,10 @@ export function DeleteServerConfig(arg1) {
 
 export function EditServerConfig(arg1) {
   return window['go']['main']['App']['EditServerConfig'](arg1);
+}
+
+export function EditUserConfigItem(arg1, arg2) {
+  return window['go']['main']['App']['EditUserConfigItem'](arg1, arg2);
 }
 
 export function GetServerConfig(arg1) {

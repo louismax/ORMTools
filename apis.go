@@ -498,5 +498,14 @@ func (a *App) QueryTableFieldList(key, dbKey, tableName, tbComment string) inter
 }
 
 func (a *App) GetUserConfig() interface{} {
+	fmt.Printf("%+v", UserConfig)
+
+	return a.ReturnSuccess(UserConfig)
+}
+
+func (a *App) EditUserConfigItem(key string, val interface{}) interface{} {
+	fmt.Printf("key:%s,val:%+v", key, val)
+	UserConfig[key] = val
+
 	return a.ReturnSuccess(UserConfig)
 }

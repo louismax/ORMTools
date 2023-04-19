@@ -13,7 +13,6 @@
 				<DragAdjustWidth />
 				<el-main class="rightMain">
 					<home ref="homeRef" />
-					<!-- <div id="result" class="result">{{ data.resultText }}</div> -->
 				</el-main>
 			</el-container>
 		</el-container>
@@ -54,7 +53,20 @@ GetUserCongifInfo();
 
 	function GetUserCongifInfo() {
 	  GetUserConfig().then(result => {
+		  console.log(result)
 	  	if (result.State == true){
+			if(result.Data.WindowTheme == "SystemDefault"){
+				window.runtime.WindowSetSystemDefaultTheme();
+			}else if(result.Data.WindowTheme == "Light"){
+				window.runtime.WindowSetLightTheme();
+			}else if(result.Data.WindowTheme == "Dark"){
+				window.runtime.WindowSetDarkTheme();
+			}
+			
+			document.getElementsByTagName('html')[0].dataset.codeTheme = result.Data.CodeTheme
+			
+			
+			
 			store.commit('setUserConfig', result.Data)
 		}
 	  })
@@ -65,13 +77,56 @@ GetUserCongifInfo();
 	@use "sass:meta";
 
 
-	html[data-code-theme="light"] {
-		@include meta.load-css("highlight.js/styles/atom-one-light.css");
+	html[data-code-theme="a11y-dark"] {
+		@include meta.load-css("highlight.js/styles/a11y-dark.css");
 	}
-
-	html[data-code-theme="dark"] {
+	html[data-code-theme="a11y-light"] {
+		@include meta.load-css("highlight.js/styles/a11y-light.css");
+	}
+	html[data-code-theme="agate"] {
+		@include meta.load-css("highlight.js/styles/agate.css");
+	}
+	html[data-code-theme="an-old-hope"] {
+		@include meta.load-css("highlight.js/styles/an-old-hope.css");
+	}
+	html[data-code-theme="androidstudio"] {
+		@include meta.load-css("highlight.js/styles/androidstudio.css");
+	}
+	html[data-code-theme="atom-one-dark"] {
 		@include meta.load-css("highlight.js/styles/atom-one-dark.css");
 	}
+	html[data-code-theme="atom-one-light"] {
+		@include meta.load-css("highlight.js/styles/atom-one-light.css");
+	}
+	html[data-code-theme="atelier-cave"] {
+		@include meta.load-css("highlight.js/styles/base16/atelier-cave.css");
+	}
+	html[data-code-theme="paraiso"] {
+		@include meta.load-css("highlight.js/styles/base16/paraiso.css");
+	}
+	html[data-code-theme="github"] {
+		@include meta.load-css("highlight.js/styles/github.css");
+	}
+	html[data-code-theme="github-dark"] {
+		@include meta.load-css("highlight.js/styles/github-dark.css");
+	}
+	html[data-code-theme="github-dark-dimmed"] {
+		@include meta.load-css("highlight.js/styles/github-dark-dimmed.css");
+	}
+	html[data-code-theme="gradient-dark"] {
+		@include meta.load-css("highlight.js/styles/gradient-dark.css");
+	}
+	html[data-code-theme="gradient-light"] {
+		@include meta.load-css("highlight.js/styles/gradient-light.css");
+	}
+	html[data-code-theme="vs"] {
+		@include meta.load-css("highlight.js/styles/vs.css");
+	}
+	html[data-code-theme="vs2015"] {
+		@include meta.load-css("highlight.js/styles/vs2015.css");
+	}
+	
+	
 
 	.container {
 		display: flex;

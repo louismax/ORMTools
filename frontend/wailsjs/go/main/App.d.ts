@@ -4,11 +4,15 @@ import {main} from '../models';
 
 export function AddServerConfig(arg1:main.ServerConfig):Promise<any>;
 
+export function ApiTest(arg1:any):Promise<string>;
+
 export function CloseDBConnect(arg1:string):Promise<any>;
 
 export function DeleteServerConfig(arg1:string):Promise<any>;
 
 export function EditServerConfig(arg1:main.ServerConfig):Promise<any>;
+
+export function EditUserConfigItem(arg1:string,arg2:any):Promise<any>;
 
 export function GetServerConfig(arg1:string):Promise<any>;
 

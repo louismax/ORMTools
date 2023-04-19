@@ -211,39 +211,91 @@
 			</div>
 		</template>
 
-		<el-form :model="ConfigForm" >
+		<el-form :model="ConfigForm">
 			<span class="form_item_Grade">通用</span>
-			<el-form-item label="主题">
-				<el-select v-model="ConfigForm.WindowTheme" value-key placeholder="请选择主题">
+			<el-form-item label="应用主题">
+				<el-select v-model="ConfigForm.WindowTheme" value-key placeholder="请选择应用主题" @change="WindowThemeChange">
 					<el-option label="跟随系统默认" value="SystemDefault" />
 					<el-option label="浅色" value="Light" />
 					<el-option label="深色" value="Dark" />
 				</el-select>
 			</el-form-item>
+			<el-form-item label="代码主题">
+				<el-select v-model="ConfigForm.CodeTheme" value-key placeholder="请选择代码主题" @change="CodeThemeChange">
+					<el-option label="A 11 Y Dark" value="a11y-dark" />
+					<el-option label="A 11 Y Light" value="a11y-light" />
+					<el-option label="Agate" value="agate" />
+					<el-option label="An Old Hope" value="an-old-hope" />
+					<el-option label="Androidstudio" value="androidstudio" />
+					<el-option label="Atom One Dark" value="atom-one-dark" />
+					<el-option label="Atom One Light" value="atom-one-light" />
+					<el-option label="Base16 / Atelier Cave" value="atelier-cave" />
+					<el-option label="Base16 / Paraiso" value="paraiso" />
+					<el-option label="Github" value="github" />
+					<el-option label="Github Dark" value="github-dark" />
+					<el-option label="Github Dark Dimmed" value="github-dark-dimmed" />
+					<el-option label="Gradient Dark" value="gradient-dark" />
+					<el-option label="Gradient Light" value="gradient-light" />
+					<el-option label="Vs" value="vs" />
+					<el-option label="Vs 2015" value="vs2015" />
+				</el-select>
+				<span>（PS:下方为代码主题演示）</span>
+				<highlightjs class="exam_code_box" language='golang' :code="codeStr" />
+			</el-form-item>
 			<el-divider />
 			<span class="form_item_Grade">连接树</span>
-			<el-form-item label="忽略的数据库"  class="custom_item">
+			
+			<el-form-item label="忽略数据库" label-width="100px" class="custom_item">
 				<el-tag v-for="tag in ConfigForm.HideDBList" :key="tag" class="tag_custom" effect="plain" closable
 					:disable-transitions="false" @close="handleDBListClose(tag)">
 					{{ tag }}
 				</el-tag>
 				<el-input v-if="inputHideDBVisible" ref="InputHideDBRef" v-model="inputHideDBValue" style="width: 5rem;"
-					size="small" @keyup.enter="hideDBInputConfirm"  />
+					size="small" @keyup.enter="hideDBInputConfirm" />
 				<el-button v-else class="button-new-tag" size="small" @click="showHideDBInput">
-					+ 添加新的
+					+ 添加数据库名
 				</el-button>
 			</el-form-item>
+			
+			<el-form-item label="忽略表" label-width="100px" class="custom_item">
+				<el-tag v-for="tag in ConfigForm.HideTableList" :key="tag" class="tag_custom" effect="plain" closable
+					:disable-transitions="false" @close="handleTableListClose(tag)">
+					{{ tag }}
+				</el-tag>
+				<el-input v-if="inputHideTableVisible" ref="InputHideTableRef" v-model="inputHideTableValue" style="width: 5rem;"
+					size="small" @keyup.enter="hideTableInputConfirm" />
+				<el-button v-else class="button-new-tag" size="small" @click="showHideTableInput">
+					+ 添加表名
+				</el-button>
+			</el-form-item>
+			
+			<el-form-item label="显示表备注" label-width="100px" class="custom_item">
+				<el-switch v-model="ConfigForm.HasTableComment" />
+			</el-form-item>
+			
 			<el-divider />
+			
+			<span class="form_item_Grade">表结构</span>
+			
+			<el-form-item label="自定义表名" label-width="128px" class="custom_item">
+				<el-switch v-model="ConfigForm.HasRewriteTableName" />
+			</el-form-item>
+			<el-form-item label="Json标签" label-width="128px" class="custom_item">
+				<el-switch v-model="ConfigForm.HasJsonTag" />
+			</el-form-item>
+			<el-form-item label="Grom Column标签" label-width="128px" class="custom_item">
+				<el-switch v-model="ConfigForm.HasGormColumnTag" />
+			</el-form-item>
 
 		</el-form>
 
 
-		<template #footer>
+		<!-- <template #footer>
 			<span class="dialog-footer">
 				<el-button type="primary">保存</el-button>
 				<el-button>取消</el-button>
 			</span>
-		</template>
+		</template> -->
 	</el-dialog>
 
 
@@ -265,14 +317,11 @@
 		GetServerConfig,
 		EditServerConfig,
 		TestDBConnect,
+		EditUserConfigItem,
 	} from '../../wailsjs/go/main/App'
 	import {
 		useStore
 	} from 'vuex'
-
-
-
-
 	const emit = defineEmits(['GetServerList'])
 	const fileSelect = ref();
 	const ruleFormRef = ref();
@@ -300,18 +349,9 @@
 	});
 	let SaveType = "Add"
 	let dialogName = "新连接配置"
+	let ConfigForm = ref({})
+	let codeStr = 'func (a *App) ApiTest(r interface{}) string {\n\treturn fmt.Sprintf("result:%s", r.(string))\n}'
 
-	let ConfigForm = ref({
-	})
-	
-	console.log(store.state.userConfig)
-
- //    onMounted(()=>{
-	// 	 ConfigForm = store.state.userConfig;
-	// })
-	
-	
-	
 	defineExpose({
 		OpenConfigEdit
 	})
@@ -568,12 +608,39 @@
 			target.parentNode.blur();
 		}
 		target.blur();
-		
 		ConfigForm = store.state.userConfig;
-		console.log(ConfigForm)
-
 		dialogConfigVisible.value = true;
 	}
+
+
+	const WindowThemeChange = (val) => {
+		if (val == "SystemDefault") {
+			window.runtime.WindowSetSystemDefaultTheme();
+		} else if (val == "Light") {
+			window.runtime.WindowSetLightTheme();
+		} else if (val == "Dark") {
+			window.runtime.WindowSetDarkTheme();
+		}
+		EditUserConfigItem("WindowTheme", val).then(result => {
+			console.log(result)
+			if (result.State == true) {
+				store.commit('setUserConfig', result.Data)
+			} else {
+				connSuccess.value.style.display = "none"
+				ElMessageBox({
+					title: "保存配置失败",
+					message: result.Message,
+					type: 'error'
+				})
+			}
+		})
+		//console.log(val)
+	}
+	const CodeThemeChange = (val) => {
+		console.log(val)
+		document.getElementsByTagName('html')[0].dataset.codeTheme = val
+	}
+
 
 	const inputHideDBVisible = ref(false)
 	const InputHideDBRef = ref()
@@ -588,12 +655,31 @@
 		})
 	}
 	const hideDBInputConfirm = () => {
-		console.log(ConfigForm)
 		if (inputHideDBValue.value) {
 			ConfigForm.HideDBList.push(inputHideDBValue.value)
 		}
 		inputHideDBVisible.value = false
 		inputHideDBValue.value = ''
+	}
+	
+	const inputHideTableVisible = ref(false)
+	const InputHideTableRef = ref()
+	const inputHideTableValue = ref('')
+	const handleTableListClose = (tag) => {
+		ConfigForm.HideTableList.splice(ConfigForm.HideTableList.indexOf(tag), 1)
+	}
+	const showHideTableInput = () => {
+		inputHideTableVisible.value = true
+		nextTick(() => {
+			InputHideTableRef.value.input.focus()
+		})
+	}
+	const hideTableInputConfirm = () => {
+		if (inputHideTableValue.value) {
+			ConfigForm.HideTableList.push(inputHideTableValue.value)
+		}
+		inputHideTableVisible.value = false
+		inputHideTableValue.value = ''
 	}
 </script>
 
@@ -659,7 +745,20 @@
 		margin-right: 5px;
 		margin-bottom: 5px;
 	}
-	.custom_item .el-form-item__content{
+
+	.custom_item .el-form-item__content {
 		align-items: flex-start;
+	}
+
+	.exam_code_box {
+		width: 100vw;
+		margin: 10px 0;
+		border: 1px solid var(--el-border-color);
+
+		& code {
+			padding: 10px;
+			text-align: left;
+			line-height: 1.2rem;
+		}
 	}
 </style>

@@ -38,6 +38,12 @@ func (a *App) startup(ctx context.Context) {
 			runtime.LogErrorf(ctx, "文件创建失败,err:%+v", err)
 			return
 		}
+		encoder := gob.NewEncoder(svrDatFile)
+		err = encoder.Encode(ServerConfigMap)
+		if err != nil {
+			runtime.LogErrorf(a.ctx, "gob编码错误,err:%+v", err)
+			return
+		}
 	} else {
 		svrDatFile, err = os.OpenFile(serverDataPath, os.O_RDWR, 0666)
 		if err != nil {
@@ -52,8 +58,10 @@ func (a *App) startup(ctx context.Context) {
 		}
 	}
 
+	fmt.Println("开始读取配置文件")
 	userCfgPath = AppDataPath + `\UserConfig.yaml`
 	if ok, _ := PathExists(userCfgPath); !ok {
+		fmt.Println("创建文件")
 		userCfgFile, err = os.OpenFile(userCfgPath, os.O_RDWR|os.O_CREATE, 0666)
 		if err != nil {
 			runtime.LogErrorf(ctx, "文件创建失败,err:%+v", err)
@@ -88,7 +96,7 @@ func (a *App) startup(ctx context.Context) {
 			runtime.LogErrorf(ctx, "用户配置文件解析失败,err:%+v", err)
 			return
 		}
-		//fmt.Printf("配置文件内容%+v", UserConfig)
+		fmt.Printf("配置文件内容%+v\n", UserConfig)
 
 		userCfgFile, err = os.OpenFile(userCfgPath, os.O_RDWR, 0666)
 		if err != nil {

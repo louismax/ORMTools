@@ -10,6 +10,7 @@ const (
 
 const (
 	ConfigKeyWT                     string = "WindowTheme"
+	ConfigKeyCT                     string = "CodeTheme"
 	ConfigKeyHasTableComment        string = "HasTableComment"
 	ConfigKeyHasRewriteTableName    string = "HasRewriteTableName"
 	ConfigKeyHasJsonTag             string = "HasJsonTag"
