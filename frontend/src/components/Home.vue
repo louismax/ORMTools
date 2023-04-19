@@ -63,13 +63,11 @@
 	import {
 		ref
 	} from 'vue'
-	// import 'highlight.js/lib/common';
-	// import hljsVuePlugin from "@highlightjs/vue-plugin";
-	//import 'highlight.js/styles/atom-one-dark.css'
 	import hljs from 'highlight.js/lib/core';
 	import {
 		QueryTableFieldList,
 	} from '../../wailsjs/go/main/App'
+
 
 	let hjTag = ref(0)
 	let tabIndex = 0
@@ -113,8 +111,6 @@
 	}
 
 	function GetTableInfo(key, dbName, tableName,tbComment) {
-
-
 		QueryTableFieldList(key, dbName, tableName,tbComment).then(result => {
 			if (result.State == true) {
 				const newTabName = `${++tabIndex}`
@@ -128,18 +124,6 @@
 				ElMessage.error(result.Message)
 			}
 		})
-
-		
-		//
-		//
-
-		// const preEl = document.querySelectorAll('pre code');
-		// console.log(preEl)
-		// preEl.forEach(el => {
-		// 	hljs.highlightBlock(el);
-		// });
-
-		
 	}
 </script>
 

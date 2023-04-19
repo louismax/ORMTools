@@ -14,6 +14,8 @@ export function GetServerConfig(arg1:string):Promise<any>;
 
 export function GetServerConfigList():Promise<any>;
 
+export function GetUserConfig():Promise<any>;
+
 export function OpenDBConnect(arg1:main.ServerConfig):Promise<any>;
 
 export function QueryTableFieldList(arg1:string,arg2:string,arg3:string,arg4:string):Promise<any>;

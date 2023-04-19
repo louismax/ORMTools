@@ -26,6 +26,10 @@ export function GetServerConfigList() {
   return window['go']['main']['App']['GetServerConfigList']();
 }
 
+export function GetUserConfig() {
+  return window['go']['main']['App']['GetUserConfig']();
+}
+
 export function OpenDBConnect(arg1) {
   return window['go']['main']['App']['OpenDBConnect'](arg1);
 }

@@ -7,7 +7,8 @@
 			</el-header>
 			<el-container class="MainBox">
 				<el-aside class="leftAside">
-					<dbTree ref="dbTreeRef" @openServerConfigEdit="openServerConfigEdit" @GetTableInfo="GetTableInfoByToHome" />
+					<dbTree ref="dbTreeRef" @openServerConfigEdit="openServerConfigEdit"
+						@GetTableInfo="GetTableInfoByToHome" />
 				</el-aside>
 				<DragAdjustWidth />
 				<el-main class="rightMain">
@@ -24,21 +25,21 @@
 	import Home from './components/Home.vue'
 	import Header from './components/Header.vue'
 	import dbTree from './components/dbTree.vue'
-	// import 'highlight.js/styles/atom-one-light.css?inline'
-	// import 'highlight.js/styles/atom-one-dark.css?inline'
-	
+	import { useStore } from 'vuex';
 	import {
 		ref,
 		reactive
 	} from 'vue'
-	// import {
-	// 	GetUserAppDataPath
-	// } from '../wailsjs/go/main/App'
+	import {
+		GetUserConfig
+	} from '../wailsjs/go/main/App'
 
+	const store = useStore();
 	const dbTreeRef = ref()
 	const headerRef = ref()
 	const homeRef = ref()
 
+GetUserCongifInfo();
 	const GetServerListToTree = () => {
 		dbTreeRef.value.GetServerList()
 	}
@@ -46,36 +47,32 @@
 	const openServerConfigEdit = (key) => {
 		headerRef.value.OpenConfigEdit(key)
 	}
-	
-	const GetTableInfoByToHome = (key,dbName,tableName,tbComment) => {
-		homeRef.value.GetTableInfo(key,dbName,tableName,tbComment)
+
+	const GetTableInfoByToHome = (key, dbName, tableName, tbComment) => {
+		homeRef.value.GetTableInfo(key, dbName, tableName, tbComment)
 	}
 
-
-	// const data = reactive({
-	// 	name: "",
-	// 	resultText: "",
-	// })
-	// greet();
-
-	// function greet() {
-	// 	GetUserAppDataPath().then(result => {
-	// 		data.resultText = result
-	// 	})
-	// }
+	function GetUserCongifInfo() {
+	  GetUserConfig().then(result => {
+	  	if (result.State == true){
+			store.commit('setUserConfig', result.Data)
+		}
+	  })
+	}
 </script>
 
 <style lang="scss">
 	@use "sass:meta";
 
-	
+
 	html[data-code-theme="light"] {
-	  @include meta.load-css("highlight.js/styles/atom-one-light.css");
+		@include meta.load-css("highlight.js/styles/atom-one-light.css");
 	}
+
 	html[data-code-theme="dark"] {
-	  @include meta.load-css("highlight.js/styles/atom-one-dark.css");
+		@include meta.load-css("highlight.js/styles/atom-one-dark.css");
 	}
-	
+
 	.container {
 		display: flex;
 		flex-flow: column nowrap;
@@ -99,26 +96,26 @@
 	.leftAside {
 		min-width: 320px;
 		margin-bottom: 10px;
-		
+
 		&::-webkit-scrollbar {
 			width: 8px;
 			height: 8px;
 		}
-		
+
 		&::-webkit-scrollbar-track {
 			background: rgb(239, 239, 239);
 			border-radius: 2px;
 		}
-		
+
 		&::-webkit-scrollbar-thumb {
 			background: #bfbfbf;
 			border-radius: 10px;
 		}
-		
+
 		&::-webkit-scrollbar-thumb:hover {
 			background: #7d7d7d;
 		}
-		
+
 	}
 
 	.rightMain {

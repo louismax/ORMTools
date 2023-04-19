@@ -4,7 +4,7 @@ import (
 	"changeme/constant"
 )
 
-var DefaultConfig = map[interface{}]interface{}{
+var DefaultConfig = map[string]interface{}{
 	constant.ConfigKeyWT:                  constant.ThemeSystemDefault, //主题
 	constant.ConfigKeyHasTableComment:     true,                        //是否显示表备注
 	constant.ConfigKeyHasRewriteTableName: true,                        //是否重写表名
@@ -18,4 +18,4 @@ var DefaultConfig = map[interface{}]interface{}{
 	constant.ConfigKeyMySqlToStructFieldType: map[string]string{},
 }
 
-var UserConfig = make(map[interface{}]interface{})
+var UserConfig = make(map[string]interface{})

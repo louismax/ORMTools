@@ -36,6 +36,9 @@
 					<span :class="data.obj_type == 'connect'?'treeNodetitleSpan':''" :data-objType="data.obj_type" :data-conState="data.conState" :data-key="data.key" :data-isCurrent="node.isCurrent">
 						{{node.label}}
 					</span>
+					<span v-if="data.obj_type == 'table' && $store.state.userConfig.HasTableComment">
+						&nbsp;{{data.comment}}
+					</span>
 				</span>
 				<span v-if="node.isCurrent && data.obj_type == 'connect'" class="tree-node-btn">
 					<el-tooltip v-if="!data.conState" content="打开连接" placement="bottom" effect="light">
@@ -124,8 +127,7 @@
 		QueryTableList,
 		RefreshDBConnect,
 	} from '../../wailsjs/go/main/App'
-
-
+	
 	const emit = defineEmits(['openServerConfigEdit','GetTableInfo'])
 
 	defineExpose({
@@ -147,6 +149,7 @@
 			}
 		})
 	}
+	
 
 	const handleNodeClick = (data, node, tn, e) => {
 		console.log("点击节点:", node)

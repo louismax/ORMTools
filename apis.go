@@ -496,3 +496,7 @@ func (a *App) QueryTableFieldList(key, dbKey, tableName, tbComment string) inter
 
 	return a.ReturnSuccess(str)
 }
+
+func (a *App) GetUserConfig() interface{} {
+	return a.ReturnSuccess(UserConfig)
+}
