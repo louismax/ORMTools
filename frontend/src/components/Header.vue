@@ -52,7 +52,7 @@
 			<div class="grid-content ep-bg-purple-light" />
 		</div>
 		<el-col :span="4" style="text-align: right;padding-right: 30px;">
-			<el-button plain>
+			<el-button plain @click="openDialogConfigForm">
 				<el-icon>
 					<Tools />
 				</el-icon>
@@ -198,6 +198,54 @@
 		</template>
 	</el-dialog>
 
+	<el-dialog v-model="dialogConfigVisible" :show-close="false" class="addConfigWin" :close-on-click-modal="false"
+		destroy-on-close :close-on-press-escape="false" :draggable="true">
+		<template #header="{ close, titleId, titleClass }">
+			<div class="my-header">
+				<h4 :id="titleId" :class="titleClass">设置</h4>
+				<el-button text @click="close">
+					<el-icon size="24">
+						<Close />
+					</el-icon>
+				</el-button>
+			</div>
+		</template>
+
+		<el-form :model="ConfigForm" >
+			<span class="form_item_Grade">通用</span>
+			<el-form-item label="主题">
+				<el-select v-model="ConfigForm.WindowTheme" value-key placeholder="请选择主题">
+					<el-option label="跟随系统默认" value="SystemDefault" />
+					<el-option label="浅色" value="Light" />
+					<el-option label="深色" value="Dark" />
+				</el-select>
+			</el-form-item>
+			<el-divider />
+			<span class="form_item_Grade">连接树</span>
+			<el-form-item label="忽略的数据库"  class="custom_item">
+				<el-tag v-for="tag in ConfigForm.HideDBList" :key="tag" class="tag_custom" effect="plain" closable
+					:disable-transitions="false" @close="handleDBListClose(tag)">
+					{{ tag }}
+				</el-tag>
+				<el-input v-if="inputHideDBVisible" ref="InputHideDBRef" v-model="inputHideDBValue" style="width: 5rem;"
+					size="small" @keyup.enter="hideDBInputConfirm"  />
+				<el-button v-else class="button-new-tag" size="small" @click="showHideDBInput">
+					+ 添加新的
+				</el-button>
+			</el-form-item>
+			<el-divider />
+
+		</el-form>
+
+
+		<template #footer>
+			<span class="dialog-footer">
+				<el-button type="primary">保存</el-button>
+				<el-button>取消</el-button>
+			</span>
+		</template>
+	</el-dialog>
+
 
 </template>
 
@@ -218,13 +266,20 @@
 		EditServerConfig,
 		TestDBConnect,
 	} from '../../wailsjs/go/main/App'
+	import {
+		useStore
+	} from 'vuex'
+
+
 
 
 	const emit = defineEmits(['GetServerList'])
 	const fileSelect = ref();
 	const ruleFormRef = ref();
 	const connSuccess = ref();
+	const store = useStore();
 	let dialogFormVisible = ref(false);
+	let dialogConfigVisible = ref(false);
 	let FormData = reactive({
 		key: "", //仅编辑时存在
 		local_name: "",
@@ -246,6 +301,17 @@
 	let SaveType = "Add"
 	let dialogName = "新连接配置"
 
+	let ConfigForm = ref({
+	})
+	
+	console.log(store.state.userConfig)
+
+ //    onMounted(()=>{
+	// 	 ConfigForm = store.state.userConfig;
+	// })
+	
+	
+	
 	defineExpose({
 		OpenConfigEdit
 	})
@@ -494,6 +560,41 @@
 			}
 		})
 	}
+
+	const openDialogConfigForm = (e) => {
+		// 添加失去焦点事件
+		let target = e.target;
+		if (target.nodeName === "BUTTON" || target.nodeName === "SPAN") {
+			target.parentNode.blur();
+		}
+		target.blur();
+		
+		ConfigForm = store.state.userConfig;
+		console.log(ConfigForm)
+
+		dialogConfigVisible.value = true;
+	}
+
+	const inputHideDBVisible = ref(false)
+	const InputHideDBRef = ref()
+	const inputHideDBValue = ref('')
+	const handleDBListClose = (tag) => {
+		ConfigForm.HideDBList.splice(ConfigForm.HideDBList.indexOf(tag), 1)
+	}
+	const showHideDBInput = () => {
+		inputHideDBVisible.value = true
+		nextTick(() => {
+			InputHideDBRef.value.input.focus()
+		})
+	}
+	const hideDBInputConfirm = () => {
+		console.log(ConfigForm)
+		if (inputHideDBValue.value) {
+			ConfigForm.HideDBList.push(inputHideDBValue.value)
+		}
+		inputHideDBVisible.value = false
+		inputHideDBValue.value = ''
+	}
 </script>
 
 <style>
@@ -510,7 +611,8 @@
 	}
 
 	.addConfigWin .el-dialog__header {
-		padding: 10px 20px;
+		padding: 10px 10px;
+		margin-right: 0;
 	}
 
 	.addConfigWin .el-dialog__body {
@@ -545,5 +647,19 @@
 
 	.addConfigWin .el-dialog__footer {
 		padding: 10px 20px;
+	}
+
+	.form_item_Grade {
+		display: flex;
+		font-weight: bold;
+		font-size: 16px;
+	}
+
+	.tag_custom {
+		margin-right: 5px;
+		margin-bottom: 5px;
+	}
+	.custom_item .el-form-item__content{
+		align-items: flex-start;
 	}
 </style>
