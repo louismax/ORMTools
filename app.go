@@ -38,13 +38,6 @@ func (a *App) startup(ctx context.Context) {
 			runtime.LogErrorf(ctx, "文件创建失败,err:%+v", err)
 			return
 		}
-
-		//encoder := gob.NewEncoder(svrDatFile)
-		//err = encoder.Encode(ServerConfigMap)
-		//if err != nil {
-		//	runtime.LogErrorf(ctx, "编码错误,err:%+v", err)
-		//	return
-		//}
 	} else {
 		svrDatFile, err = os.OpenFile(serverDataPath, os.O_RDWR, 0666)
 		if err != nil {
@@ -89,12 +82,13 @@ func (a *App) startup(ctx context.Context) {
 			fmt.Println("读取用户配置文件失败：", err)
 			return
 		}
-		fmt.Println("yaml 文件的内容: \n", string(dataBytes))
+
 		err = yaml.Unmarshal(dataBytes, &UserConfig)
 		if err != nil {
 			runtime.LogErrorf(ctx, "用户配置文件解析失败,err:%+v", err)
 			return
 		}
+		//fmt.Printf("配置文件内容%+v", UserConfig)
 
 		userCfgFile, err = os.OpenFile(userCfgPath, os.O_RDWR, 0666)
 		if err != nil {

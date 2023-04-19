@@ -10,11 +10,13 @@ const (
 
 const (
 	ConfigKeyWT                     string = "WindowTheme"
+	ConfigKeyHasTableComment        string = "HasTableComment"
+	ConfigKeyHasRewriteTableName    string = "HasRewriteTableName"
+	ConfigKeyHasJsonTag             string = "HasJsonTag"
+	ConfigKeyHasGormColumnTag       string = "HasGormColumnTag"
 	ConfigKeyHideDBList             string = "HideDBList"
 	ConfigKeyHideTableList          string = "HideTableList"
 	ConfigKeyHideTableColumnList    string = "HideTableColumnList"
-	ConfigKeyHasTableComment        string = "HasTableComment"
-	ConfigKeyHasTableRI             string = "ConfigKeyHasTableRI"
 	ConfigKeyMySqlToStructFieldType string = "MySqlToStructFieldType"
 )
 

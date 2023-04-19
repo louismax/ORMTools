@@ -308,8 +308,8 @@ func (a *App) OpenDBConnect(req ServerConfig) interface{} {
 	}
 	dbTree := make([]TreeData, 0)
 	hideDB := make(map[string]interface{})
-	for _, v := range UserConfig[constant.ConfigKeyHideDBList].([]string) {
-		hideDB[v] = 1
+	for _, v := range UserConfig[constant.ConfigKeyHideDBList].([]interface{}) {
+		hideDB[v.(string)] = 1
 	}
 
 	for _, v := range dataBases {
@@ -444,12 +444,26 @@ func (a *App) QueryTableFieldList(key, dbKey, tableName, tbComment string) inter
 	maxTagLen := 0
 	sm := make([]StructColumnAction, 0)
 	for _, v := range tableColumn {
+		tag := ""
+		if UserConfig[constant.ConfigKeyHasJsonTag].(bool) {
+			tag += fmt.Sprintf("json:%q", v.ColumnName)
+		}
+		if UserConfig[constant.ConfigKeyHasGormColumnTag].(bool) {
+			if UserConfig[constant.ConfigKeyHasJsonTag].(bool) {
+				tag += " "
+			}
+			tag += fmt.Sprintf("gorm:%q", fmt.Sprintf("column:%s", v.ColumnName))
+		}
 		tmp := StructColumnAction{
 			SName:    camelString(v.ColumnName),
 			SType:    DBFieldTypeToStructFieldType(v.DataType),
-			STag:     fmt.Sprintf("%#q", fmt.Sprintf("json:%q", v.ColumnName)),
 			SComment: "// " + v.ColumnComment,
 		}
+		if tag != "" {
+			tmp.STag = fmt.Sprintf("%#q", tag)
+		}
+		//ColumnName      string `json:"columnName" gorm:"column:beast_id"`
+
 		if len(tmp.SName) > maxNameLen {
 			maxNameLen = len(tmp.SName)
 		}
@@ -465,9 +479,20 @@ func (a *App) QueryTableFieldList(key, dbKey, tableName, tbComment string) inter
 	str := fmt.Sprintf("//%s %s \n", camelString(tableName), tbComment)
 	str += fmt.Sprintf("type %s struct{\n", camelString(tableName))
 	for _, v := range sm {
-		str += fmt.Sprintf("\t%-"+strconv.Itoa(maxNameLen)+"s %-"+strconv.Itoa(maxTypeLen)+"s %-"+strconv.Itoa(maxTagLen)+"s %s\n", v.SName, v.SType, v.STag, v.SComment)
+		if v.STag == "" {
+			str += fmt.Sprintf("\t%-"+strconv.Itoa(maxNameLen)+"s %-"+strconv.Itoa(maxTypeLen)+"s %s\n", v.SName, v.SType, v.SComment)
+		} else {
+			str += fmt.Sprintf("\t%-"+strconv.Itoa(maxNameLen)+"s %-"+strconv.Itoa(maxTypeLen)+"s %-"+strconv.Itoa(maxTagLen)+"s %s\n", v.SName, v.SType, v.STag, v.SComment)
+		}
 	}
 	str += "}\n"
+
+	if UserConfig[constant.ConfigKeyHasRewriteTableName].(bool) {
+		str += fmt.Sprintf("\n// TableName %s\n", camelString(tableName))
+		str += fmt.Sprintf("func (%s) TableName() string {\n", camelString(tableName))
+		str += fmt.Sprintf("\treturn %q\n", tableName)
+		str += "}\n"
+	}
 
 	return a.ReturnSuccess(str)
 }

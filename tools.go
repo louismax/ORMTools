@@ -168,9 +168,9 @@ func camelString(s string) string {
 }
 
 func DBFieldTypeToStructFieldType(t string) string {
-	userFileRole := UserConfig[constant.ConfigKeyMySqlToStructFieldType].(map[string]string)
+	userFileRole := UserConfig[constant.ConfigKeyMySqlToStructFieldType].(map[string]interface{})
 	if _, ok := userFileRole[t]; ok {
-		return userFileRole[t]
+		return userFileRole[t].(string)
 	}
 	r := ""
 	switch strings.ToLower(t) {
