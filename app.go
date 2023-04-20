@@ -58,10 +58,8 @@ func (a *App) startup(ctx context.Context) {
 		}
 	}
 
-	fmt.Println("开始读取配置文件")
 	userCfgPath = AppDataPath + `\UserConfig.yaml`
 	if ok, _ := PathExists(userCfgPath); !ok {
-		fmt.Println("创建文件")
 		userCfgFile, err = os.OpenFile(userCfgPath, os.O_RDWR|os.O_CREATE, 0666)
 		if err != nil {
 			runtime.LogErrorf(ctx, "文件创建失败,err:%+v", err)

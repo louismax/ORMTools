@@ -12,7 +12,7 @@ export function DeleteServerConfig(arg1:string):Promise<any>;
 
 export function EditServerConfig(arg1:main.ServerConfig):Promise<any>;
 
-export function EditUserConfigItem(arg1:string,arg2:any):Promise<any>;
+export function EditUserConfigItem(arg1:{[key: string]: any}):Promise<any>;
 
 export function GetServerConfig(arg1:string):Promise<any>;
 

@@ -36,8 +36,8 @@
 					<span :class="data.obj_type == 'connect'?'treeNodetitleSpan':''" :data-objType="data.obj_type" :data-conState="data.conState" :data-key="data.key" :data-isCurrent="node.isCurrent">
 						{{node.label}}
 					</span>
-					<span v-if="data.obj_type == 'table' && $store.state.userConfig.HasTableComment">
-						&nbsp;{{data.comment}}
+					<span style="color: #c3c3c3;" v-if="data.obj_type == 'table' && $store.state.userConfig.HasTableComment">
+						&nbsp;--{{data.comment}}
 					</span>
 				</span>
 				<span v-if="node.isCurrent && data.obj_type == 'connect'" class="tree-node-btn">
@@ -262,7 +262,7 @@
 	const refresh = (e,obj) => {
 		// 添加失去焦点事件
 		let target = e.target;
-		console.log(e)
+		//console.log(e)
 		if (target.nodeName === "BUTTON" || target.nodeName === "SPAN") {
 			target.parentNode.blur();
 		}else if (target.nodeName === "I" ) {

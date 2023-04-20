@@ -199,7 +199,7 @@
 	</el-dialog>
 
 	<el-dialog v-model="dialogConfigVisible" :show-close="false" class="addConfigWin" :close-on-click-modal="false"
-		destroy-on-close :close-on-press-escape="false" :draggable="true">
+		destroy-on-close :close-on-press-escape="false" :draggable="true" @close="CloseDialogConfig">
 		<template #header="{ close, titleId, titleClass }">
 			<div class="my-header">
 				<h4 :id="titleId" :class="titleClass">设置</h4>
@@ -244,39 +244,39 @@
 			</el-form-item>
 			<el-divider />
 			<span class="form_item_Grade">连接树</span>
-			
-			<el-form-item label="忽略数据库" label-width="100px" class="custom_item">
+
+			<el-form-item label="忽略数据库" label-width="100px" class="custom_item custom_item_listX">
 				<el-tag v-for="tag in ConfigForm.HideDBList" :key="tag" class="tag_custom" effect="plain" closable
 					:disable-transitions="false" @close="handleDBListClose(tag)">
 					{{ tag }}
 				</el-tag>
 				<el-input v-if="inputHideDBVisible" ref="InputHideDBRef" v-model="inputHideDBValue" style="width: 5rem;"
-					size="small" @keyup.enter="hideDBInputConfirm" />
+					size="small" @keyup.enter="hideDBInputConfirm" @blur="hideDBInputConfirm"/>
 				<el-button v-else class="button-new-tag" size="small" @click="showHideDBInput">
 					+ 添加数据库名
 				</el-button>
 			</el-form-item>
-			
-			<el-form-item label="忽略表" label-width="100px" class="custom_item">
+
+			<el-form-item label="忽略表" label-width="100px" class="custom_item custom_item_listX">
 				<el-tag v-for="tag in ConfigForm.HideTableList" :key="tag" class="tag_custom" effect="plain" closable
 					:disable-transitions="false" @close="handleTableListClose(tag)">
 					{{ tag }}
 				</el-tag>
-				<el-input v-if="inputHideTableVisible" ref="InputHideTableRef" v-model="inputHideTableValue" style="width: 5rem;"
-					size="small" @keyup.enter="hideTableInputConfirm" />
+				<el-input v-if="inputHideTableVisible" ref="InputHideTableRef" v-model="inputHideTableValue"
+					style="width: 5rem;" size="small" @keyup.enter="hideTableInputConfirm" @blur="hideTableInputConfirm"/>
 				<el-button v-else class="button-new-tag" size="small" @click="showHideTableInput">
 					+ 添加表名
 				</el-button>
 			</el-form-item>
-			
+
 			<el-form-item label="显示表备注" label-width="100px" class="custom_item">
 				<el-switch v-model="ConfigForm.HasTableComment" />
 			</el-form-item>
-			
+
 			<el-divider />
-			
+
 			<span class="form_item_Grade">表结构</span>
-			
+
 			<el-form-item label="自定义表名" label-width="128px" class="custom_item">
 				<el-switch v-model="ConfigForm.HasRewriteTableName" />
 			</el-form-item>
@@ -286,16 +286,101 @@
 			<el-form-item label="Grom Column标签" label-width="128px" class="custom_item">
 				<el-switch v-model="ConfigForm.HasGormColumnTag" />
 			</el-form-item>
+			<el-form-item label="忽略字段" label-width="128px" class="custom_item custom_item_listX">
+				<el-tag v-for="tag in ConfigForm.HideTableColumnList" :key="tag" class="tag_custom" effect="plain"
+					closable :disable-transitions="false" @close="handleTableColumnListClose(tag)">
+					{{ tag }}
+				</el-tag>
+				<el-input v-if="inputHideTableColumnVisible" ref="InputHideTableColumnRef"
+					v-model="inputHideTableColumnValue" style="width: 5rem;" size="small"
+					@keyup.enter="hideTableColumnInputConfirm" @blur="hideTableColumnInputConfirm"/>
+				<el-button v-else class="button-new-tag" size="small" @click="showHideTableColumnInput">
+					+ 添加字段名
+				</el-button>
+			</el-form-item>
+			<el-form-item label="字段类型转换规则" label-width="128px" class="custom_item">
+				<el-table :data="toFieldList" style="width: 100%" empty-text="暂无规则">
+					<el-table-column label="数据库字段" align="center">
+						<template #default="scope">
+							<span style="margin-left: 10px">{{ scope.row.key }}</span>
+						</template>
+					</el-table-column>
+					<el-table-column width="24px" align="center">
+						<template #header>
+							<el-icon>
+								<DArrowRight />
+							</el-icon>
+						</template>
+
+						<template #default="scope">
+							<div>
+								<el-icon>
+									<DArrowRight />
+								</el-icon>
+							</div>
+						</template>
+					</el-table-column>
+					<el-table-column label="Golang Struct 字段" align="center">
+						<template #default="scope">
+							<span style="margin-left: 10px">{{ scope.row.val }}</span>
+						</template>
+					</el-table-column>
+					<el-table-column width="54px" align="center">
+						<template #default="scope">
+							<el-button v-if="!showAddField" @click="delFieldItem($event,scope.row.id,scope.row.key)"
+								text :icon="Delete" style="width: 24px;" />
+						</template>
+					</el-table-column>
+				</el-table>
+				<div v-if="showAddField" style="width: 100vw;">
+					<el-row>
+						<el-col :span="8" style="text-align: right;">
+							<el-select v-model="addFieldSelect.dbField" filterable allow-create default-first-option
+								:reserve-keyword="false" size="small" style="width: 100px;" value-key
+								placeholder="数据库字段">
+								<el-option-group v-for="group in dbFieldOptions" :key="group.key" :label="group.label">
+									<el-option v-for="item in group.options" :key="item.value" :label="item.label"
+										:value="item.value"
+										:disabled="toFieldList.findIndex((value)=>value.key==item.value) == 0" />
+								</el-option-group>
+							</el-select>
+						</el-col>
+						<el-col :span="4" style="text-align: right;padding-right: 3%;">
+							<el-icon>
+								<DArrowRight />
+							</el-icon>
+						</el-col>
+						<el-col :span="7" style="text-align: right;">
+							<el-select v-model="addFieldSelect.goField" filterable allow-create default-first-option
+								:reserve-keyword="false" size="small" style="width: 100px;" value-key
+								placeholder="Golang字段">
+								<el-option v-for="item in golangFieldOptions" :key="item.value" :label="item.label"
+									:value="item.value" />
+							</el-select>
+						</el-col>
+						<el-col :span="5">
+							<el-button text :icon="Select" style="width: 24px;" @click="addFieldList($event)"
+								:disabled="addFieldSelect.dbField == '' || addFieldSelect.goField == ''" />
+							<el-button text :icon="CloseBold" style="width: 24px;" @click="showAddField = false" />
+						</el-col>
+
+					</el-row>
+				</div>
+				<div v-if="!showAddField" style="width: 100vw;text-align: right;margin-top: 5px;">
+					<el-button size="small" @click="showAddField = true">
+						新增规则
+					</el-button>
+					<el-button v-if="toFieldList.length >0" size="small" @click="emptyFieldList($event)">
+						全部清空
+					</el-button>
+					<el-button v-if="toFieldList.length ==0" size="small" @click="importDefaultFieldRule($event)">
+						引入全部默认规则
+					</el-button>
+				</div>
+
+			</el-form-item>
 
 		</el-form>
-
-
-		<!-- <template #footer>
-			<span class="dialog-footer">
-				<el-button type="primary">保存</el-button>
-				<el-button>取消</el-button>
-			</span>
-		</template> -->
 	</el-dialog>
 
 
@@ -309,6 +394,10 @@
 		Close,
 		Promotion,
 		SuccessFilled,
+		DArrowRight,
+		Delete,
+		Select,
+		CloseBold,
 	} from '@element-plus/icons-vue'
 	import 'element-plus/theme-chalk/display.css'
 	import {
@@ -322,6 +411,18 @@
 	import {
 		useStore
 	} from 'vuex'
+	import {
+		v4 as uuidv4
+	} from 'uuid'
+
+	import {
+		DBFieldOptions,
+		GolangFieldOptions,
+		DefaultFieldRule
+	} from '../hook.js'
+	const dbFieldOptions = DBFieldOptions();
+	const golangFieldOptions = GolangFieldOptions();
+
 	const emit = defineEmits(['GetServerList'])
 	const fileSelect = ref();
 	const ruleFormRef = ref();
@@ -475,7 +576,6 @@
 	}
 
 	const fileChange = (e) => {
-		//console.log(fileSelect.value.value)
 		FormData.ssh_keyfile = fileSelect.value.value
 	}
 
@@ -621,23 +721,10 @@
 		} else if (val == "Dark") {
 			window.runtime.WindowSetDarkTheme();
 		}
-		EditUserConfigItem("WindowTheme", val).then(result => {
-			console.log(result)
-			if (result.State == true) {
-				store.commit('setUserConfig', result.Data)
-			} else {
-				connSuccess.value.style.display = "none"
-				ElMessageBox({
-					title: "保存配置失败",
-					message: result.Message,
-					type: 'error'
-				})
-			}
-		})
 		//console.log(val)
 	}
 	const CodeThemeChange = (val) => {
-		console.log(val)
+		//console.log(val)
 		document.getElementsByTagName('html')[0].dataset.codeTheme = val
 	}
 
@@ -661,7 +748,7 @@
 		inputHideDBVisible.value = false
 		inputHideDBValue.value = ''
 	}
-	
+
 	const inputHideTableVisible = ref(false)
 	const InputHideTableRef = ref()
 	const inputHideTableValue = ref('')
@@ -680,6 +767,104 @@
 		}
 		inputHideTableVisible.value = false
 		inputHideTableValue.value = ''
+	}
+
+	const inputHideTableColumnVisible = ref(false)
+	const InputHideTableColumnRef = ref()
+	const inputHideTableColumnValue = ref('')
+	const handleTableColumnListClose = (tag) => {
+		ConfigForm.HideTableColumnList.splice(ConfigForm.HideTableColumnList.indexOf(tag), 1)
+	}
+	const showHideTableColumnInput = () => {
+		inputHideTableColumnVisible.value = true
+		nextTick(() => {
+			InputHideTableColumnRef.value.input.focus()
+		})
+	}
+	const hideTableColumnInputConfirm = () => {
+		if (inputHideTableColumnValue.value) {
+			ConfigForm.HideTableColumnList.push(inputHideTableColumnValue.value)
+		}
+		inputHideTableColumnVisible.value = false
+		inputHideTableColumnValue.value = ''
+	}
+
+	let toFieldList = ref([])
+	let addFieldSelect = ref({
+		dbField: "",
+		goField: ""
+	})
+
+	let showAddField = ref(false)
+	const delFieldItem = (e, id, key) => {
+		// 添加失去焦点事件
+		let target = e.target;
+		if (target.nodeName === "BUTTON" || target.nodeName === "SPAN") {
+			target.parentNode.blur();
+		}
+		target.blur();
+
+		delete ConfigForm.MySqlToStructFieldType[key];
+		toFieldList.value.splice(toFieldList.value.findIndex(item => item.id === id), 1);
+	}
+	const addFieldList = (e) => {
+		// 添加失去焦点事件
+		let target = e.target;
+		if (target.nodeName === "BUTTON" || target.nodeName === "SPAN") {
+			target.parentNode.blur();
+		}
+		target.blur();
+
+		toFieldList.value.push({
+			id: uuidv4(),
+			key: addFieldSelect.value.dbField,
+			val: addFieldSelect.value.goField
+		})
+		ConfigForm.MySqlToStructFieldType[addFieldSelect.value.dbField] = addFieldSelect.value.goField;
+
+		addFieldSelect.value.dbField = "";
+		addFieldSelect.value.goField = "";
+		showAddField.value = false;
+	}
+	const emptyFieldList = (e) => {
+		// 添加失去焦点事件
+		let target = e.target;
+		if (target.nodeName === "BUTTON" || target.nodeName === "SPAN") {
+			target.parentNode.blur();
+		}
+		target.blur();
+		ConfigForm.MySqlToStructFieldType = {};
+		toFieldList.value.splice(0)
+	}
+	const importDefaultFieldRule = (e) => {
+		// 添加失去焦点事件
+		let target = e.target;
+		if (target.nodeName === "BUTTON" || target.nodeName === "SPAN") {
+			target.parentNode.blur();
+		}
+		target.blur();
+		
+		DefaultFieldRule().value.forEach( function(item) {
+		  ConfigForm.MySqlToStructFieldType[item.key] = item.val;
+		})
+		
+		toFieldList.value = DefaultFieldRule().value
+	}
+
+	const CloseDialogConfig = () => {
+		EditUserConfigItem(ConfigForm).then(result => {
+			console.log(result)
+			if (result.State == true) {
+				store.commit('setUserConfig', result.Data)
+			} else {
+				connSuccess.value.style.display = "none"
+				ElMessageBox({
+					title: "保存配置失败",
+					message: result.Message,
+					type: 'error'
+				})
+			}
+		})
 	}
 </script>
 
@@ -748,6 +933,11 @@
 
 	.custom_item .el-form-item__content {
 		align-items: flex-start;
+
+	}
+
+	.custom_item_listX .el-form-item__content {
+		padding-top: 3px;
 	}
 
 	.exam_code_box {
@@ -760,5 +950,13 @@
 			text-align: left;
 			line-height: 1.2rem;
 		}
+	}
+
+	.el-table__empty-block {
+		min-height: 50px !important;
+	}
+
+	.el-table__empty-text {
+		line-height: 50px !important;
 	}
 </style>

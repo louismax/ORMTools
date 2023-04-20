@@ -9,6 +9,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 	"golang.org/x/crypto/ssh"
+	"gopkg.in/yaml.v3"
 	"gorm.io/gorm"
 	"os"
 	"sort"
@@ -498,14 +499,34 @@ func (a *App) QueryTableFieldList(key, dbKey, tableName, tbComment string) inter
 }
 
 func (a *App) GetUserConfig() interface{} {
-	fmt.Printf("%+v", UserConfig)
-
+	//fmt.Printf("%+v", UserConfig)
 	return a.ReturnSuccess(UserConfig)
 }
 
-func (a *App) EditUserConfigItem(key string, val interface{}) interface{} {
-	fmt.Printf("key:%s,val:%+v", key, val)
-	UserConfig[key] = val
+func (a *App) EditUserConfigItem(val map[string]interface{}) interface{} {
+	var err error
+	UserConfig = val
+	_ = userCfgFile.Close() //先关闭文件占用
+	userCfgFile, err = os.OpenFile(userCfgPath, os.O_RDWR|os.O_CREATE, 0666)
+	if err != nil {
+		runtime.LogErrorf(a.ctx, "文件打开失败,err:%+v", err)
+		return a.ReturnError("文件打开失败")
+	}
+	d, err := yaml.Marshal(&UserConfig)
+	if err != nil {
+		runtime.LogErrorf(a.ctx, "yaml序列化处理失败,err:%+v", err)
+		return a.ReturnError("yaml序列化处理失败")
+	}
+	_, err = userCfgFile.Write(d)
+	if err != nil {
+		runtime.LogErrorf(a.ctx, "用户配置文件写入失败,err:%+v", err)
+		return a.ReturnError("用户配置文件写入失败")
+	}
+	err = userCfgFile.Sync()
+	if err != nil {
+		runtime.LogErrorf(a.ctx, "用户配置文件写入同步失败,err:%+v", err)
+		return a.ReturnError("用户配置文件写入同步失败")
+	}
 
 	return a.ReturnSuccess(UserConfig)
 }

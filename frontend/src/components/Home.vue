@@ -2,7 +2,7 @@
 	<div class="banner_box" v-if="editableTabs.length < 1">
 		<el-image style="margin: auto; width: 400px;" :src="banner_img" fit="scale-down" />
 		<div class="banner_btn">
-			<el-button :text="true">
+			<el-button :text="true" @click="helpUrl($event,'github')">
 				<svg t="1681490354196" class="icon" viewBox="0 0 1024 1024" version="1.1"
 					xmlns="http://www.w3.org/2000/svg" p-id="2602" width="32" height="32">
 					<path
@@ -10,7 +10,7 @@
 						fill="#515151" p-id="2603"></path>
 				</svg>
 			</el-button>
-			<el-button :text="true">
+			<el-button :text="true" @click="helpUrl($event,'gitee')">
 				<svg t="1681490502766" class="icon" viewBox="0 0 1024 1024" version="1.1"
 					xmlns="http://www.w3.org/2000/svg" p-id="2960" width="32" height="32">
 					<path
@@ -18,7 +18,7 @@
 						fill="#C71D23" p-id="2961"></path>
 				</svg>
 			</el-button>
-			<el-button :text="true">
+			<el-button :text="true" @click="helpUrl($event,'blog')">
 				<svg t="1681490628474" class="icon" viewBox="0 0 1024 1024" version="1.1"
 					xmlns="http://www.w3.org/2000/svg" p-id="4001" width="32" height="32">
 					<path
@@ -26,7 +26,7 @@
 						fill="#515151" p-id="4002"></path>
 				</svg>
 			</el-button>
-			<el-button :text="true">
+			<el-button :text="true" @click="helpUrl($event,'wechat')">
 				<svg t="1681490715988" class="icon" viewBox="0 0 1024 1024" version="1.1"
 					xmlns="http://www.w3.org/2000/svg" p-id="5027" width="32" height="32">
 					<path
@@ -34,7 +34,7 @@
 						fill="#69BB64" p-id="5028"></path>
 				</svg>
 			</el-button>
-			<el-button :text="true">
+			<el-button :text="true" @click="helpUrl($event,'email')">
 				<svg t="1681490762477" class="icon" viewBox="0 0 1365 1024" version="1.1"
 					xmlns="http://www.w3.org/2000/svg" p-id="6054" width="32" height="32">
 					<path
@@ -110,6 +110,26 @@
 				ElMessage.error(result.Message)
 			}
 		})
+	}
+	
+	const helpUrl=(e,type)=>{
+		// 添加失去焦点事件
+		let target = e.target;
+		console.log(e)
+		if (target.nodeName === "BUTTON" || target.nodeName === "SPAN") {
+			target.parentNode.blur();
+		}else if (target.nodeName === "svg" ) {
+			target.parentNode.parentNode.blur();
+		}else if (target.nodeName === "path" ) {
+			target.parentNode.parentNode.parentNode.blur();
+		}
+		target.blur();
+		
+		if(type == "github"){
+			window.runtime.BrowserOpenURL("https://github.com/louismax")
+		}
+		
+		console.log(type)
 	}
 </script>
 

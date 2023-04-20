@@ -22,8 +22,8 @@ export function EditServerConfig(arg1) {
   return window['go']['main']['App']['EditServerConfig'](arg1);
 }
 
-export function EditUserConfigItem(arg1, arg2) {
-  return window['go']['main']['App']['EditUserConfigItem'](arg1, arg2);
+export function EditUserConfigItem(arg1) {
+  return window['go']['main']['App']['EditUserConfigItem'](arg1);
 }
 
 export function GetServerConfig(arg1) {
