@@ -1,4 +1,4 @@
-module changeme
+module github.com/louismax/ORMTools
 
 go 1.18
 

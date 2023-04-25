@@ -1,14 +1,14 @@
 package main
 
 import (
-	"changeme/constant"
-	"changeme/dbTools"
-	"changeme/helpers"
 	"encoding/base64"
 	"encoding/gob"
 	"encoding/json"
 	"fmt"
 	"github.com/google/uuid"
+	"github.com/louismax/ORMTools/constant"
+	"github.com/louismax/ORMTools/dbTools"
+	"github.com/louismax/ORMTools/helpers"
 	"github.com/mitchellh/go-homedir"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 	"golang.org/x/crypto/ssh"

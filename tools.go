@@ -1,9 +1,9 @@
 package main
 
 import (
-	"changeme/constant"
 	"encoding/json"
 	"fmt"
+	"github.com/louismax/ORMTools/constant"
 	"github.com/mitchellh/go-homedir"
 	"log"
 	"os"

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"changeme/constant"
+	"github.com/louismax/ORMTools/constant"
 )
 
 var DefaultConfig = map[string]interface{}{

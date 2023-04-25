@@ -1,10 +1,10 @@
 package main
 
 import (
-	"changeme/constant"
 	"context"
 	"encoding/gob"
 	"fmt"
+	"github.com/louismax/ORMTools/constant"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 	"gopkg.in/yaml.v3"
 	"os"
