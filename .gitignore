@@ -18,3 +18,5 @@ build/bin
 node_modules
 frontend/dist
 .idea/
+*.log
+main_local_test.go

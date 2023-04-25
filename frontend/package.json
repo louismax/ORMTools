@@ -1,7 +1,7 @@
 {
   "name": "frontend",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -10,17 +10,22 @@
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.1.0",
+    "@highlightjs/vue-plugin": "^2.1.0",
     "element-plus": "^2.3.2",
+    "highlight.js": "^11.7.0",
     "node-sass": "^8.0.0",
-    "sass": "^1.60.0",
+    "sass": "^1.62.0",
     "sass-loader": "^13.2.2",
     "unplugin-auto-import": "^0.15.2",
+    "unplugin-element-plus": "^0.7.1",
     "unplugin-icons": "^0.16.1",
     "unplugin-vue-components": "^0.24.1",
-    "vue": "^3.2.37"
+    "uuid": "^9.0.0",
+    "vue": "^3.2.37",
+    "vuex": "^4.0.2"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^3.0.3",
-    "vite": "^3.0.7"
+    "vite": "^4.2.1"
   }
 }

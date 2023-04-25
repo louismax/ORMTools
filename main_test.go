@@ -1,63 +1,81 @@
 package main
 
 import (
-	"fmt"
-	"os"
+	"changeme/dbTools"
 	"testing"
 )
 
-func TestName(t *testing.T) {
-	//err := os.Chdir(`C:\Users\alone\ORMTools`)
-	//if err != nil {
-	//	t.Log(err)
-	//	return
-	//}
-	//path, _ := os.Getwd()
-	//t.Log(path)
-	//// 获取文件的绝对路径
-	//path2, err := filepath.Abs(`./a.dat`)
-	//if err != nil {
-	//	fmt.Println("file path error: " + err.Error())
-	//	return
-	//}
-	path2 := fmt.Sprintf(`%s\AppData\server.dat`, getUserAppDataPath())
-	t.Log(path2)
-	file, err := os.OpenFile(path2, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0666)
-	if err != nil {
-		fmt.Printf("创建文件失败:%+v\n", err)
-	}
-	defer file.Close()
-	_, err = file.WriteString("123")
-	if err != nil {
-		fmt.Println(err)
-	}
+func TestSSHGorm(t *testing.T) {
+	db, dial, err := dbTools.SSHOpenDB(dbTools.SSH{
+		Host: "192.168.0.202",
+		User: "root",
+		Port: 22,
+		//KeyFile: "~/.ssh/id_rsa",
+		Password: "123456",
+		Type:     "PASSWORD", // PASSWORD or KEY
+	}, dbTools.MySQL{
+		Host:     "192.168.0.201",
+		User:     "root",
+		Password: "123456",
+		Port:     3306,
+		Database: "mysql",
+	})
+	defer func() {
+		_ = dial.Close()
+	}()
+	t.Log(dial.User())
+	t.Log(dial.RemoteAddr().String())
 
-	//path, err := filepath.Abs(`./`)
-	//if err != nil {
-	//	fmt.Println("file path error: " + err.Error())
-	//	return
-	//}
-	//t.Log(path)
-	//path2, err := filepath.Rel(`C:\Users\alone\ORMTools\con.bat`, path)
-	//if err != nil {
-	//	fmt.Println("file path error: " + err.Error())
-	//	return
-	//}
-	//t.Log(path2)
+	if err != nil {
+		return
+	}
+	if err != nil {
+		t.Logf("数据库连接失败,err:%+v", err)
+		return
+	}
+	sqlDB, err := db.DB()
+	if err != nil {
+		t.Logf("database/sql 获取失败,err:%+v", err)
+		return
+	}
+	//Ping
+	if err = sqlDB.Ping(); err != nil {
+		t.Logf("sql ping 失败,err:%+v", err)
+		return
+	}
+	//返回数据库统计信息
+	t.Logf("实时数据库统计信息:%+v", sqlDB.Stats())
+
 }
 
-//func createFileWithDir(path string, name string, content string) {
-//	err := os.MkdirAll(path, os.ModePerm)
-//	if err != nil {
-//		fmt.Printf("创建文件夹失败:%+v", err)
-//	}
-//	file, err := os.OpenFile(path+"\\"+name, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0666)
-//	if err != nil {
-//		fmt.Printf("创建文件失败:%+v\n", err)
-//	}
-//	defer file.Close()
-//	_, err = file.WriteString(content)
-//	if err != nil {
-//		fmt.Println(err)
-//	}
-//}
+func TestGorm(t *testing.T) {
+	db, err := dbTools.OpenDB(dbTools.MySQL{
+		Host:     "192.168.0.201",
+		User:     "root",
+		Password: "123456",
+		Port:     3306,
+		Database: "mysql",
+	})
+	if err != nil {
+		t.Logf("数据库连接失败,err:%+v", err)
+		return
+	}
+	sqlDB, err := db.DB()
+	if err != nil {
+		t.Logf("database/sql 获取失败,err:%+v", err)
+		return
+	}
+	//Ping
+	if err = sqlDB.Ping(); err != nil {
+		t.Logf("sql ping 失败,err:%+v", err)
+		return
+	}
+	//返回数据库统计信息
+	t.Logf("实时数据库统计信息:%+v", sqlDB.Stats())
+
+}
+
+func TestCamelString(t *testing.T) {
+	str := "basic_user_info"
+	t.Log(camelString(str))
+}

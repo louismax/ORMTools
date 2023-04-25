@@ -1,11 +1,10 @@
 <template>
-	<el-tree :data="dataSource" node-key="id" empty-text="暂无配置" :highlight-current="true" :expand-on-click-node="false"
-		:check-on-click-node="true" @node-click="handleNodeClick" @current-change="currentNodeChange" default-expand-all
-		icon-class="none" ref="treeForm">
+	<el-tree :data="dataSource" node-key="key" empty-text="暂无数据库配置" :highlight-current="true"
+		:expand-on-click-node="true" :check-on-click-node="true" @node-click="handleNodeClick"
+		default-expand-all icon-class="none" ref="treeForm">
 		<template #default="{ node, data }">
 			<span class="custom-tree-node">
 				<span class="tree-node-title">
-					<!-- <el-image style="width: 16px; height: 16px" :src="img_server" fit="contain" /> -->
 					<svg v-if="data.obj_type == 'connect'" style="width: 16px; height: 16px;padding-right: 4px;"
 						t="1680792160481" class="icon" viewBox="0 0 1024 1024" version="1.1"
 						xmlns="http://www.w3.org/2000/svg" p-id="3925" width="200" height="200">
@@ -31,13 +30,17 @@
 						xmlns="http://www.w3.org/2000/svg" p-id="7260" width="200" height="200">
 						<path
 							d="M329.142857 786.285714v-109.714285q0-8-5.142857-13.142858t-13.142857-5.142857H128q-8 0-13.142857 5.142857t-5.142857 13.142858v109.714285q0 8 5.142857 13.142857t13.142857 5.142858h182.857143q8 0 13.142857-5.142858t5.142857-13.142857z m0-219.428571V457.142857q0-8-5.142857-13.142857t-13.142857-5.142857H128q-8 0-13.142857 5.142857t-5.142857 13.142857v109.714286q0 8 5.142857 13.142857t13.142857 5.142857h182.857143q8 0 13.142857-5.142857t5.142857-13.142857z m292.571429 219.428571v-109.714285q0-8-5.142857-13.142858t-13.142858-5.142857H420.571429q-8 0-13.142858 5.142857t-5.142857 13.142858v109.714285q0 8 5.142857 13.142857t13.142858 5.142858h182.857142q8 0 13.142858-5.142858t5.142857-13.142857zM329.142857 347.428571V237.714286q0-8-5.142857-13.142857t-13.142857-5.142858H128q-8 0-13.142857 5.142858t-5.142857 13.142857v109.714285q0 8 5.142857 13.142858t13.142857 5.142857h182.857143q8 0 13.142857-5.142857t5.142857-13.142858z m292.571429 219.428572V457.142857q0-8-5.142857-13.142857t-13.142858-5.142857H420.571429q-8 0-13.142858 5.142857t-5.142857 13.142857v109.714286q0 8 5.142857 13.142857t13.142858 5.142857h182.857142q8 0 13.142858-5.142857t5.142857-13.142857z m292.571428 219.428571v-109.714285q0-8-5.142857-13.142858t-13.142857-5.142857h-182.857143q-8 0-13.142857 5.142857t-5.142857 13.142858v109.714285q0 8 5.142857 13.142857t13.142857 5.142858h182.857143q8 0 13.142857-5.142858t5.142857-13.142857z m-292.571428-438.857143V237.714286q0-8-5.142857-13.142857t-13.142858-5.142858H420.571429q-8 0-13.142858 5.142858t-5.142857 13.142857v109.714285q0 8 5.142857 13.142858t13.142858 5.142857h182.857142q8 0 13.142858-5.142857t5.142857-13.142858z m292.571428 219.428572V457.142857q0-8-5.142857-13.142857t-13.142857-5.142857h-182.857143q-8 0-13.142857 5.142857t-5.142857 13.142857v109.714286q0 8 5.142857 13.142857t13.142857 5.142857h182.857143q8 0 13.142857-5.142857t5.142857-13.142857z m0-219.428572V237.714286q0-8-5.142857-13.142857t-13.142857-5.142858h-182.857143q-8 0-13.142857 5.142858t-5.142857 13.142857v109.714285q0 8 5.142857 13.142858t13.142857 5.142857h182.857143q8 0 13.142857-5.142857t5.142857-13.142858z m73.142857-182.857142v621.714285q0 37.714286-26.857142 64.571429t-64.571429 26.857143H128q-37.714286 0-64.571429-26.857143t-26.857142-64.571429V164.571429q0-37.714286 26.857142-64.571429t64.571429-26.857143h768q37.714286 0 64.571429 26.857143t26.857142 64.571429z"
-							p-id="7261" fill="#707070"></path>
+							p-id="7261" fill="#707070">
+						</path>
 					</svg>
-					<span>
+					<span :class="data.obj_type == 'connect'?'treeNodetitleSpan':''" :data-objType="data.obj_type" :data-conState="data.conState" :data-key="data.key" :data-isCurrent="node.isCurrent">
 						{{node.label}}
 					</span>
+					<span style="color: #c3c3c3;" v-if="data.obj_type == 'table' && $store.state.userConfig.HasTableComment">
+						&nbsp;--{{data.comment}}
+					</span>
 				</span>
-				<span v-if="node.isCurrent && data.obj_type == 'connect'">
+				<span v-if="node.isCurrent && data.obj_type == 'connect'" class="tree-node-btn">
 					<el-tooltip v-if="!data.conState" content="打开连接" placement="bottom" effect="light">
 						<el-button :text="true" style="width: 32px;height: 27px;margin: 0;" @click.stop="openDB(data)">
 							<svg style="width: 16px; height: 16px;" t="1680797183435" class="icon"
@@ -61,8 +64,8 @@
 						</el-button>
 					</el-tooltip>
 
-					<el-tooltip v-if="data.conState" content="重载该数据库库表结构" placement="bottom" effect="light">
-						<el-button :text="true" style="width: 27px;height: 27px;margin: 0;" @click.stop="refresh(data)">
+					<el-tooltip v-if="data.conState" content="重载库表结构" placement="bottom" effect="light">
+						<el-button :text="true" style="width: 27px;height: 27px;margin: 0;" @click.stop="refresh($event,data)">
 							<el-icon size="18">
 								<Refresh />
 							</el-icon>
@@ -90,11 +93,18 @@
 							</el-button>
 						</div>
 					</el-tooltip>
-
-
-
 					<!-- <a style="margin-left: 8px" @click="remove(node, data)"> Delete </a> -->
 				</span>
+				<span v-if="node.isCurrent && data.obj_type == 'db'">
+					<el-tooltip content="重载库表结构" placement="bottom" effect="light">
+						<el-button :text="true" style="width: 27px;height: 27px;margin: 0;" @click.stop="refresh($event,data)">
+							<el-icon size="18">
+								<Refresh />
+							</el-icon>
+						</el-button>
+					</el-tooltip>
+				</span>
+				
 			</span>
 		</template>
 	</el-tree>
@@ -103,111 +113,215 @@
 
 <script setup>
 	import {
-		ref
-	} from 'vue';
-	import {
 		Coin,
 		Delete,
 		Edit,
 		Refresh,
 	} from '@element-plus/icons-vue'
-	import img_server from '../assets/images/server.png'
+
+	import {
+		GetServerConfigList,
+		DeleteServerConfig,
+		OpenDBConnect,
+		CloseDBConnect,
+		QueryTableList,
+		RefreshDBConnect,
+	} from '../../wailsjs/go/main/App'
+	import{
+		BtnTargetBlur
+	} from '../tools.js'
+	
+	const emit = defineEmits(['openServerConfigEdit','GetTableInfo'])
+
+	defineExpose({
+		GetServerList
+	})
 
 	const treeForm = ref(null);
 	let selectId = ref(0)
-	let dataSource = ref([{
-			id: 1,
-			label: 'localhost_3306',
-			children: [],
-			conState: false,
-			obj_type: 'connect',
-		},
-		{
-			id: 2,
-			label: '192.168.0.200:3306',
-			children: [{
-					id: 4,
-					label: 'base_trade',
-					children: [],
-					conState: false,
-					obj_type: 'db',
-				},
-				{
-					id: 5,
-					label: 'biz_stock_sell_storage',
-					children: [],
-					conState: false,
-					obj_type: 'db',
+	let dataSource = ref()
+
+	GetServerList();
+
+	function GetServerList() {
+		GetServerConfigList().then(result => {
+			if (result.State == true) {
+				dataSource.value = result.Data
+			} else {
+				ElMessage.error(result.Message)
+			}
+		})
+	}
+	
+
+	const handleNodeClick = (data, node, tn, e) => {
+		//console.log("点击节点:", node)
+		var treeSpan = document.getElementsByClassName('treeNodetitleSpan');
+		for (let j = 0; j < treeSpan.length; j++) {
+			if(treeSpan[j].dataset.objtype == "connect"){
+				//console.log(treeSpan)
+				if(treeSpan[j].parentNode.parentNode.clientWidth <330 && treeSpan[j].dataset.key == data.key){
+					treeSpan[j].className = "treeNodetitleSpan tree-node-title-span"
+				}else{
+					treeSpan[j].className = "treeNodetitleSpan"
 				}
-			],
-			conState: false,
-			obj_type: 'connect',
-		},
-		{
-			id: 3,
-			label: 'VM-201(开发)',
-			children: [{
-					id: 6,
-					label: 'mysql',
-					children: [],
-					conState: false,
-					obj_type: 'db',
-				},
-				{
-					id: 7,
-					label: 'base_basic',
-					children: [{
-							id: 8,
-							label: 'bs_school_organization',
-							children: [],
-							conState: false,
-							obj_type: 'table',
-						},
-						{
-							id: 9,
-							label: 'bs_user_student',
-							children: [],
-							conState: false,
-							obj_type: 'table',
-						},
-					],
-					conState: false,
-					obj_type: 'db',
-				},
-			],
-			conState: false,
-			obj_type: 'connect',
-		},
-	])
-
-	function currentNodeChange(data, node) {
-		// console.log("节点选中状态变化", data, node)
+			}
+		}
+		
+		if(data.obj_type == "connect"){
+			
+		}else if(data.obj_type == "db" && data.children == null){
+			QueryTableList(data.parentSvrKey,data.label).then(result => {
+				if (result.State == true) {
+					data.children = result.Data;
+					//GetServerList();
+					//treeForm.value.setCurrentNode(node)
+					//node.expanded = true
+				} else {
+					ElMessage.error(result.Message)
+				}
+			})
+		}else if(data.obj_type == "table"){
+			emit('GetTableInfo', data.parentSvrKey,data.parentDBKey,data.label,data.comment);
+		}
 	}
 
-	function handleNodeClick(data, node, tn, e) {
-		//console.log(node)
+	const openDB = (obj) => {
+		//console.log("打开连接按钮点击事件:", obj)
+		if(obj.has_record_pwd == false){
+			ElMessageBox.prompt('请输入数据库服务器登录用户密码以继续操作:', '身份验证', {
+			    confirmButtonText: '确认',
+			    cancelButtonText: '取消',
+				 inputPattern:/^.+$/,
+			    inputErrorMessage: '密码不允许为空',
+			  })
+			    .then(({ value }) => {
+					const loading = ElLoading.service({
+						//lock: true,
+						text: 'Loading',
+						background: 'rgba(0, 0, 0, 0.7)',
+					})
+					OpenDBConnect({key:obj.key,password:value}).then(result => {
+						loading.close()
+						if (result.State == true) {
+							obj.conState = true;
+							obj.children = result.Data;
+							ElMessage({
+							  type: 'success',
+							  message: `服务器已连接！`,
+							})
+							//GetServerList();
+							
+						} else {
+							ElMessage.error(result.Message)
+						}
+					})
+			    })
+			    .catch(() => {
+			      ElMessage({
+			        type: 'info',
+			        message: '操作取消',
+			      })
+			    })
+		}else{
+			const loading = ElLoading.service({
+				//lock: true,
+				text: 'Loading',
+				background: 'rgba(0, 0, 0, 0.7)',
+			})
+			OpenDBConnect({key:obj.key}).then(result => {
+				loading.close()
+				if (result.State == true) {
+					ElMessage({
+					  type: 'success',
+					  message: `服务器已连接！`,
+					})
+					//GetServerList();
+					obj.conState = true;
+					obj.children = result.Data;
+				} else {
+					ElMessage.error(result.Message)
+				}
+			})
+		}
 	}
 
-	function openDB(obj) {
-		console.log("打开连接按钮点击事件:", obj)
-		obj.conState = true;
+	const closeDB = (obj) => {
+		//console.log("关闭按钮点击事件:", obj)
+		//obj.conState = false;
+		CloseDBConnect(obj.key).then(result => {
+			if (result.State == true) {
+				ElMessage({
+				  type: 'success',
+				  message: `连接已断开！`,
+				})
+				GetServerList();
+			} else {
+				ElMessage.error(result.Message)
+			}
+		})
 	}
 
-	function closeDB(obj) {
-		console.log("关闭按钮点击事件:", obj)
-		obj.conState = false;
-	}
-
-	function refresh(obj) {
+	const refresh = (e,obj) => {
+		BtnTargetBlur(e);
+		
 		console.log("刷新按钮点击事件:", obj)
+		if(obj.obj_type == "connect"){
+			RefreshDBConnect(obj.key).then(result => {
+				if (result.State == true) {
+					//GetServerList();
+					obj.children = result.Data;
+				} else {
+					ElMessage.error(result.Message)
+				}
+			})
+		}else if (obj.obj_type == "db"){
+			QueryTableList(obj.parentSvrKey,obj.label).then(result => {
+				if (result.State == true) {
+					obj.children = result.Data;
+					//GetServerList();
+				} else {
+					ElMessage.error(result.Message)
+				}
+			})
+		}
 	}
 
-	function editDB(obj) {
-		console.log("编辑按钮点击事件:", obj)
+	const editDB = (obj) => {
+		//console.log("编辑按钮点击事件:", obj)
+		emit('openServerConfigEdit', obj.key);
 	}
 
-	function deleteDB(obj) {
-		console.log("删除按钮点击事件:", obj)
+
+	const deleteDB = (obj) => {
+		// console.log("删除按钮点击事件:", obj)
+		ElMessageBox.confirm(
+				'删除服务器配置后将不可恢复,是否继续操作?',
+				'确定删除?', {
+					confirmButtonText: '确定',
+					cancelButtonText: '取消',
+					type: 'warning',
+				}
+			)
+			.then(() => {
+				DeleteServerConfig(obj.key).then(result => {
+					if (result.State == true) {
+						GetServerList();
+						ElMessage({
+							type: 'success',
+							message: '删除成功',
+						})
+					} else {
+						ElMessage.error(result.Message)
+					}
+				})
+			})
+			.catch(() => {
+				ElMessage({
+					type: 'info',
+					message: '取消删除操作',
+				})
+			})
 	}
 </script>
 
@@ -228,11 +342,22 @@
 		justify-content: space-between;
 		font-size: 14px;
 		/* padding-right: 8px; */
+		
+		
 	}
+	
 
 	.tree-node-title {
 		display: flex;
 		justify-content: start;
 		align-items: center;
 	}
+	
+	.tree-node-title-span{
+		max-width: 150px;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
 </style>

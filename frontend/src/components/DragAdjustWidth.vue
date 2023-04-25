@@ -2,10 +2,14 @@
 	<div class="resize" title="收缩侧边栏">⋮</div>
 </template>
 <script setup>
-	import { ref,onMounted,getCurrentInstance } from 'vue';
-	
+	import {
+		ref,
+		onMounted,
+		getCurrentInstance
+	} from 'vue';
+
 	const divDom = ref(null);
-	
+
 	onMounted(() => {
 		dragControllerDiv();
 	});
@@ -15,6 +19,7 @@
 		var left = document.getElementsByClassName("leftAside");
 		var mid = document.getElementsByClassName("rightMain");
 		var box = document.getElementsByClassName("MainBox");
+		var treeSpan = document.getElementsByClassName('treeNodetitleSpan');
 		let that = this;
 		for (let i = 0; i < resize.length; i++) {
 			// 鼠标按下事件
@@ -39,6 +44,18 @@
 						mid[j].style.width =
 							box[i].clientWidth - moveLen - 10 + "px";
 					}
+
+					for (let j = 0; j < treeSpan.length; j++) {
+						if(treeSpan[j].parentNode.parentNode.clientWidth >=330){
+							treeSpan[j].className = "treeNodetitleSpan"
+						}else{
+							if(treeSpan[j].dataset.iscurrent == "true"){
+								console.log(treeSpan[j].dataset)
+								treeSpan[j].className = "treeNodetitleSpan tree-node-title-span"
+							}
+						}
+					}
+
 				};
 				// 鼠标松开事件
 				document.onmouseup = function(evt) {
@@ -47,7 +64,8 @@
 					resize[i].style.background = "#d6d6d6";
 					document.onmousemove = null;
 					document.onmouseup = null;
-					resize[i].releaseCapture && resize[i].releaseCapture(); //当你不在需要继续获得鼠标消息就要应该调用ReleaseCapture()释放掉
+					resize[i].releaseCapture && resize[i]
+						.releaseCapture(); //当你不在需要继续获得鼠标消息就要应该调用ReleaseCapture()释放掉
 				};
 				resize[i].setCapture && resize[i].setCapture(); //该函数在属于当前线程的指定窗口里设置鼠标捕获
 				return false;
