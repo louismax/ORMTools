@@ -127,6 +127,9 @@
 		QueryTableList,
 		RefreshDBConnect,
 	} from '../../wailsjs/go/main/App'
+	import{
+		BtnTargetBlur
+	} from '../tools.js'
 	
 	const emit = defineEmits(['openServerConfigEdit','GetTableInfo'])
 
@@ -152,11 +155,11 @@
 	
 
 	const handleNodeClick = (data, node, tn, e) => {
-		console.log("点击节点:", node)
+		//console.log("点击节点:", node)
 		var treeSpan = document.getElementsByClassName('treeNodetitleSpan');
 		for (let j = 0; j < treeSpan.length; j++) {
 			if(treeSpan[j].dataset.objtype == "connect"){
-				console.log(treeSpan)
+				//console.log(treeSpan)
 				if(treeSpan[j].parentNode.parentNode.clientWidth <330 && treeSpan[j].dataset.key == data.key){
 					treeSpan[j].className = "treeNodetitleSpan tree-node-title-span"
 				}else{
@@ -260,19 +263,7 @@
 	}
 
 	const refresh = (e,obj) => {
-		// 添加失去焦点事件
-		let target = e.target;
-		//console.log(e)
-		if (target.nodeName === "BUTTON" || target.nodeName === "SPAN") {
-			target.parentNode.blur();
-		}else if (target.nodeName === "I" ) {
-			target.parentNode.parentNode.blur();
-		}else if (target.nodeName === "svg" ) {
-			target.parentNode.parentNode.parentNode.blur();
-		}else if (target.nodeName === "path" ) {
-			target.parentNode.parentNode.parentNode.parentNode.blur();
-		}
-		target.blur();
+		BtnTargetBlur(e);
 		
 		console.log("刷新按钮点击事件:", obj)
 		if(obj.obj_type == "connect"){

@@ -449,6 +449,9 @@
 		GolangFieldOptions,
 		DefaultFieldRule
 	} from '../hook.js'
+	import{
+		BtnTargetBlur
+	} from '../tools.js'
 	const dbFieldOptions = DBFieldOptions();
 	const golangFieldOptions = GolangFieldOptions();
 
@@ -587,13 +590,7 @@
 
 
 	const openAddDialogForm = (e) => {
-		// 添加失去焦点事件
-		let target = e.target;
-		if (target.nodeName === "BUTTON" || target.nodeName === "SPAN") {
-			target.parentNode.blur();
-		}
-		target.blur();
-
+		BtnTargetBlur(e);
 		SaveType = "Add"
 		dialogName = "新建服务器配置";
 		dialogFormVisible.value = true;
@@ -609,12 +606,10 @@
 	}
 
 	const saveDBConfig = () => {
-		//console.log(ruleFormRef)
 		ruleFormRef.value.validate((valid) => {
 			if (valid) {
 				if (SaveType == "Add") {
 					AddServerConfig(FormData).then(result => {
-						//console.log(result)
 						if (result.State == true) {
 							emit('GetServerList');
 							ruleFormRef.value.resetFields();
@@ -698,12 +693,7 @@
 	}
 
 	const testServerConn = (e) => {
-		// 添加失去焦点事件
-		let target = e.target;
-		if (target.nodeName === "BUTTON" || target.nodeName === "SPAN") {
-			target.parentNode.blur();
-		}
-		target.blur();
+		BtnTargetBlur(e);
 		ruleFormRef.value.validate((valid) => {
 			if (valid) {
 				const loading = ElLoading.service({
@@ -713,7 +703,7 @@
 				})
 				TestDBConnect(FormData).then(result => {
 					loading.close()
-					console.log(result)
+					//console.log(result)
 					if (result.State == true) {
 						ElMessage.success('测试连接成功！')
 						connSuccess.value.style.display = "flex"
@@ -731,12 +721,7 @@
 	}
 
 	const openDialogConfigForm = (e) => {
-		// 添加失去焦点事件
-		let target = e.target;
-		if (target.nodeName === "BUTTON" || target.nodeName === "SPAN") {
-			target.parentNode.blur();
-		}
-		target.blur();
+		BtnTargetBlur(e);
 		ConfigForm = store.state.userConfig;
 		dialogConfigVisible.value = true;
 	}
@@ -826,24 +811,12 @@
 
 	let showAddField = ref(false)
 	const delFieldItem = (e, id, key) => {
-		// 添加失去焦点事件
-		let target = e.target;
-		if (target.nodeName === "BUTTON" || target.nodeName === "SPAN") {
-			target.parentNode.blur();
-		}
-		target.blur();
-
+		BtnTargetBlur(e);
 		delete ConfigForm.MySqlToStructFieldType[key];
 		toFieldList.value.splice(toFieldList.value.findIndex(item => item.id === id), 1);
 	}
 	const addFieldList = (e) => {
-		// 添加失去焦点事件
-		let target = e.target;
-		if (target.nodeName === "BUTTON" || target.nodeName === "SPAN") {
-			target.parentNode.blur();
-		}
-		target.blur();
-
+		BtnTargetBlur(e);
 		toFieldList.value.push({
 			id: uuidv4(),
 			key: addFieldSelect.value.dbField,
@@ -856,22 +829,12 @@
 		showAddField.value = false;
 	}
 	const emptyFieldList = (e) => {
-		// 添加失去焦点事件
-		let target = e.target;
-		if (target.nodeName === "BUTTON" || target.nodeName === "SPAN") {
-			target.parentNode.blur();
-		}
-		target.blur();
+		BtnTargetBlur(e);
 		ConfigForm.MySqlToStructFieldType = {};
 		toFieldList.value.splice(0)
 	}
 	const importDefaultFieldRule = (e) => {
-		// 添加失去焦点事件
-		let target = e.target;
-		if (target.nodeName === "BUTTON" || target.nodeName === "SPAN") {
-			target.parentNode.blur();
-		}
-		target.blur();
+		BtnTargetBlur(e);
 
 		DefaultFieldRule().value.forEach(function(item) {
 			ConfigForm.MySqlToStructFieldType[item.key] = item.val;
@@ -902,17 +865,7 @@
 
 
 	const exportConfig = (e) => {
-		// 添加失去焦点事件
-		let target = e.target;
-		//console.log(e)
-		if (target.nodeName === "BUTTON" || target.nodeName === "SPAN") {
-			target.parentNode.blur();
-		} else if (target.nodeName === "svg") {
-			target.parentNode.parentNode.blur();
-		} else if (target.nodeName === "path") {
-			target.parentNode.parentNode.parentNode.blur();
-		}
-		target.blur();
+		BtnTargetBlur(e);
 
 		ExportServerConfigList().then(result => {
 			if (result.State == true) {
@@ -931,30 +884,14 @@
 	}
 	
 	const importConfig = (e) => {
-		// 添加失去焦点事件
-		let target = e.target;
-		//console.log(e)
-		if (target.nodeName === "BUTTON" || target.nodeName === "SPAN") {
-			target.parentNode.blur();
-		} else if (target.nodeName === "svg") {
-			target.parentNode.parentNode.blur();
-		} else if (target.nodeName === "path") {
-			target.parentNode.parentNode.parentNode.blur();
-		}
-		target.blur();
-	
+		BtnTargetBlur(e);
 		showSvrCfgStr.value = true;
 		SvrCfgStr.value = "";
 		SvrCfgType.value = "import";
 	}
 	
 	const copySvrStr = (e) => {
-		// 添加失去焦点事件
-		let target = e.target;
-		if (target.nodeName === "BUTTON" || target.nodeName === "SPAN") {
-			target.parentNode.blur();
-		}
-		target.blur();
+		BtnTargetBlur(e);
 
 		window.runtime.ClipboardSetText(SvrCfgStr.value).then(({
 				value
@@ -967,12 +904,7 @@
 			.catch(() => {})
 	}
 	const pasteSvrStr = (e) => {
-		// 添加失去焦点事件
-		let target = e.target;
-		if (target.nodeName === "BUTTON" || target.nodeName === "SPAN") {
-			target.parentNode.blur();
-		}
-		target.blur();
+		BtnTargetBlur(e);
 	
 		window.runtime.ClipboardGetText().then((s) => {
 				SvrCfgStr.value = s;
@@ -985,12 +917,7 @@
 	}
 	
 	const downloadSvrStrFile = (e) => {
-		// 添加失去焦点事件
-		let target = e.target;
-		if (target.nodeName === "BUTTON" || target.nodeName === "SPAN") {
-			target.parentNode.blur();
-		}
-		target.blur();
+		BtnTargetBlur(e);
 		const loading = ElLoading.service({
 			//lock: true,
 			text: 'Loading',
@@ -1019,12 +946,7 @@
 	}
 	
 	const readSvrStrFile = (e) => {
-		// 添加失去焦点事件
-		let target = e.target;
-		if (target.nodeName === "BUTTON" || target.nodeName === "SPAN") {
-			target.parentNode.blur();
-		}
-		target.blur();
+		BtnTargetBlur(e);
 		const loading = ElLoading.service({
 			//lock: true,
 			text: 'Loading',
@@ -1054,12 +976,7 @@
 	}
 	
 	const submitSvrStr = (e) => {
-		// 添加失去焦点事件
-		let target = e.target;
-		if (target.nodeName === "BUTTON" || target.nodeName === "SPAN") {
-			target.parentNode.blur();
-		}
-		target.blur();
+		BtnTargetBlur(e);
 		
 		ImportServerConfigList(SvrCfgStr.value).then(result => {
 			console.log(result)

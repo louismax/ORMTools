@@ -26,7 +26,7 @@
 						fill="#515151" p-id="4002"></path>
 				</svg>
 			</el-button>
-			<el-button :text="true" @click="helpUrl($event,'wechat')">
+			<el-button :text="true" ref="buttonRef" v-click-outside="onClickOutside">
 				<svg t="1681490715988" class="icon" viewBox="0 0 1024 1024" version="1.1"
 					xmlns="http://www.w3.org/2000/svg" p-id="5027" width="32" height="32">
 					<path
@@ -34,6 +34,11 @@
 						fill="#69BB64" p-id="5028"></path>
 				</svg>
 			</el-button>
+			
+			<el-popover ref="popoverRef" :virtual-ref="buttonRef" trigger="click" virtual-triggering>
+				<el-image style="margin: auto; width: 125px;" :src="wechat_img" fit="scale-down" />
+			</el-popover>
+
 			<el-button :text="true" @click="helpUrl($event,'email')">
 				<svg t="1681490762477" class="icon" viewBox="0 0 1365 1024" version="1.1"
 					xmlns="http://www.w3.org/2000/svg" p-id="6054" width="32" height="32">
@@ -60,14 +65,21 @@
 
 <script setup>
 	import banner_img from '@/assets/images/banner.png'
+	import wechat_img from '@/assets/images/wechat.png'
+	
 	import {
-		ref
+		ref,
+		unref
 	} from 'vue'
+	import { ClickOutside as vClickOutside } from 'element-plus'
+	
 	import hljs from 'highlight.js/lib/core';
 	import {
 		QueryTableFieldList,
 	} from '../../wailsjs/go/main/App'
-
+	import {
+		BtnTargetBlur
+	} from '../tools.js'
 
 	let hjTag = ref(0)
 	let tabIndex = 0
@@ -96,8 +108,8 @@
 		editableTabs.value = tabs.filter((tab) => tab.name !== targetName)
 	}
 
-	function GetTableInfo(key, dbName, tableName,tbComment) {
-		QueryTableFieldList(key, dbName, tableName,tbComment).then(result => {
+	function GetTableInfo(key, dbName, tableName, tbComment) {
+		QueryTableFieldList(key, dbName, tableName, tbComment).then(result => {
 			if (result.State == true) {
 				const newTabName = `${++tabIndex}`
 				editableTabs.value.push({
@@ -111,25 +123,30 @@
 			}
 		})
 	}
-	
-	const helpUrl=(e,type)=>{
-		// 添加失去焦点事件
-		let target = e.target;
-		console.log(e)
-		if (target.nodeName === "BUTTON" || target.nodeName === "SPAN") {
-			target.parentNode.blur();
-		}else if (target.nodeName === "svg" ) {
-			target.parentNode.parentNode.blur();
-		}else if (target.nodeName === "path" ) {
-			target.parentNode.parentNode.parentNode.blur();
-		}
-		target.blur();
-		
-		if(type == "github"){
+
+const buttonRef = ref()
+const popoverRef = ref()
+
+	const helpUrl = (e, type) => {
+		BtnTargetBlur(e);
+
+		if (type == "github") {
 			window.runtime.BrowserOpenURL("https://github.com/louismax")
+		} else if (type == "gitee") {
+			window.runtime.BrowserOpenURL("https://gitee.com/louismaxs")
+		} else if (type == "blog") {
+			window.runtime.BrowserOpenURL("https://louiss.net/")
+		} else if (type == "wechat") {
+			unref(popoverRef).popperRef?.delayHide?.()
+		} else if (type == "email") {
+			window.runtime.BrowserOpenURL("mailto:louismax@yeah.net")
 		}
-		
+
+
 		console.log(type)
+	}
+	const onClickOutside = () => {
+	  unref(popoverRef).popperRef?.delayHide?.()
 	}
 </script>
 
@@ -151,30 +168,31 @@
 			width: 38px;
 		}
 	}
-	.code_box{
+
+	.code_box {
 		text-align: left;
-		
-		& code{
+
+		& code {
 			&::-webkit-scrollbar {
 				width: 8px;
 				height: 8px;
 			}
-			
+
 			&::-webkit-scrollbar-track {
 				background: rgb(239, 239, 239);
 				border-radius: 2px;
 			}
-			
+
 			&::-webkit-scrollbar-thumb {
 				background: #bfbfbf;
 				border-radius: 10px;
 			}
-			
+
 			&::-webkit-scrollbar-thumb:hover {
 				background: #7d7d7d;
 			}
 		}
-		
-		
+
+
 	}
 </style>
