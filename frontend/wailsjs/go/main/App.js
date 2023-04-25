@@ -26,6 +26,10 @@ export function EditUserConfigItem(arg1) {
   return window['go']['main']['App']['EditUserConfigItem'](arg1);
 }
 
+export function ExportServerConfigList() {
+  return window['go']['main']['App']['ExportServerConfigList']();
+}
+
 export function GetServerConfig(arg1) {
   return window['go']['main']['App']['GetServerConfig'](arg1);
 }
@@ -36,6 +40,10 @@ export function GetServerConfigList() {
 
 export function GetUserConfig() {
   return window['go']['main']['App']['GetUserConfig']();
+}
+
+export function ImportServerConfigList(arg1) {
+  return window['go']['main']['App']['ImportServerConfigList'](arg1);
 }
 
 export function OpenDBConnect(arg1) {
@@ -50,6 +58,10 @@ export function QueryTableList(arg1, arg2) {
   return window['go']['main']['App']['QueryTableList'](arg1, arg2);
 }
 
+export function ReadServerConfigFile() {
+  return window['go']['main']['App']['ReadServerConfigFile']();
+}
+
 export function RefreshDBConnect(arg1) {
   return window['go']['main']['App']['RefreshDBConnect'](arg1);
 }
@@ -60,6 +72,10 @@ export function ReturnError(arg1) {
 
 export function ReturnSuccess(arg1) {
   return window['go']['main']['App']['ReturnSuccess'](arg1);
+}
+
+export function SaveServerConfigFile(arg1) {
+  return window['go']['main']['App']['SaveServerConfigFile'](arg1);
 }
 
 export function TestDBConnect(arg1) {

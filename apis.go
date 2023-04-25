@@ -4,13 +4,17 @@ import (
 	"changeme/constant"
 	"changeme/dbTools"
 	"changeme/helpers"
+	"encoding/base64"
 	"encoding/gob"
+	"encoding/json"
 	"fmt"
 	"github.com/google/uuid"
+	"github.com/mitchellh/go-homedir"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 	"golang.org/x/crypto/ssh"
 	"gopkg.in/yaml.v3"
 	"gorm.io/gorm"
+	"io/ioutil"
 	"os"
 	"sort"
 	"strconv"
@@ -529,4 +533,126 @@ func (a *App) EditUserConfigItem(val map[string]interface{}) interface{} {
 	}
 
 	return a.ReturnSuccess(UserConfig)
+}
+
+func (a *App) ExportServerConfigList() interface{} {
+	b, err := json.Marshal(ServerConfigMap)
+	if err != nil {
+		runtime.LogErrorf(a.ctx, "json序列化失败,err:%+v", err)
+		return a.ReturnError("json序列化失败")
+	}
+	sEnc := base64.StdEncoding.EncodeToString(b)
+
+	es, err := helpers.EncryptByAes([]byte(sEnc))
+	if err != nil {
+		runtime.LogErrorf(a.ctx, "AES加密失败,err:%+v", err)
+		return a.ReturnError("AES加密失败")
+	}
+	return a.ReturnSuccess(es)
+}
+
+func (a *App) ImportServerConfigList(s string) interface{} {
+	es, err := helpers.DecryptByAes(s)
+	if err != nil {
+		runtime.LogErrorf(a.ctx, "AES解密失败,err:%+v", err)
+		return a.ReturnError("文本解析失败，请检查导入文本是否有效！")
+	}
+	sDec, err := base64.StdEncoding.DecodeString(string(es))
+	if err != nil {
+		runtime.LogErrorf(a.ctx, "Base64解析失败,err:%+v", err)
+		return a.ReturnError("文本解析失败，请检查导入文本是否有效！")
+	}
+	m := make(map[string]ServerConfig)
+	err = json.Unmarshal(sDec, &m)
+	if err != nil {
+		runtime.LogErrorf(a.ctx, "Json解析失败,err:%+v", err)
+		return a.ReturnError("文本解析失败，请检查导入文本是否有效！")
+	}
+	cu := time.Now().Unix()
+	for _, v := range m {
+		val := eachSvrLocalName(&v)
+		val.CreateDateUnix = cu
+		ServerConfigMap[val.Key] = *val
+		cu++
+	}
+
+	_ = svrDatFile.Close() //先关闭文件占用
+	svrDatFile, err = os.OpenFile(serverDataPath, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0666)
+	if err != nil {
+		runtime.LogErrorf(a.ctx, "文件创建失败,err:%+v", err)
+		return a.ReturnError("文件创建失败")
+	}
+	encoder := gob.NewEncoder(svrDatFile)
+	err = encoder.Encode(ServerConfigMap)
+	if err != nil {
+		runtime.LogErrorf(a.ctx, "gob编码错误,err:%+v", err)
+		return a.ReturnError("gob编码错误")
+	}
+
+	return a.ReturnSuccess("成功")
+}
+
+func eachSvrLocalName(val *ServerConfig) *ServerConfig {
+	if _, ok := ServerConfigMap[val.Key]; ok {
+		val.Key = uuid.New().String()
+	}
+	for _, v := range ServerConfigMap {
+		if v.LocalName == val.LocalName {
+			val.LocalName += "_副本"
+			eachSvrLocalName(val)
+		}
+	}
+	return val
+}
+
+func (a *App) SaveServerConfigFile(s string) interface{} {
+	up, err := homedir.Dir()
+	if err != nil {
+		runtime.LogErrorf(a.ctx, "获取用户路径失败,err:%+v", err)
+		return a.ReturnError("获取用户路径失败")
+	}
+
+	path, err := runtime.SaveFileDialog(a.ctx, runtime.SaveDialogOptions{
+		DefaultDirectory: up + "\\Desktop",
+		DefaultFilename:  "ORMTools服务配置",
+		Title:            "保存配置文件",
+	})
+	if err != nil {
+		runtime.LogErrorf(a.ctx, "用户选择路径失败,err:%+v", err)
+		return a.ReturnError("用户选择路径失败")
+	}
+	if path != "" {
+		f, err := os.OpenFile(path, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0666)
+		if err != nil {
+			runtime.LogErrorf(a.ctx, "文件创建失败,err:%+v", err)
+			return a.ReturnError("文件创建失败")
+		}
+		defer func() {
+			_ = f.Close()
+		}()
+		_, err = f.Write([]byte(s))
+		if err != nil {
+			runtime.LogErrorf(a.ctx, "文件写入失败,err:%+v", err)
+			return a.ReturnError("文件写入失败")
+		}
+		return a.ReturnSuccess(fmt.Sprintf("已保存在%s", path))
+	}
+	return a.ReturnSuccess("cancel")
+}
+
+func (a *App) ReadServerConfigFile() interface{} {
+	path, err := runtime.OpenFileDialog(a.ctx, runtime.OpenDialogOptions{})
+	if err != nil {
+		runtime.LogErrorf(a.ctx, "用户选择文件失败,err:%+v", err)
+		return a.ReturnError("用户选择文件失败")
+	}
+	if path != "" {
+		data, err := ioutil.ReadFile(path)
+		if err != nil {
+			runtime.LogErrorf(a.ctx, "文件读取失败,err:%+v", err)
+			return a.ReturnError("文件读取失败")
+		}
+		return a.ReturnSuccess(string(data))
+	}
+	return a.ReturnSuccess("cancel")
 }

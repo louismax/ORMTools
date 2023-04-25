@@ -14,11 +14,15 @@ export function EditServerConfig(arg1:main.ServerConfig):Promise<any>;
 
 export function EditUserConfigItem(arg1:{[key: string]: any}):Promise<any>;
 
+export function ExportServerConfigList():Promise<any>;
+
 export function GetServerConfig(arg1:string):Promise<any>;
 
 export function GetServerConfigList():Promise<any>;
 
 export function GetUserConfig():Promise<any>;
+
+export function ImportServerConfigList(arg1:string):Promise<any>;
 
 export function OpenDBConnect(arg1:main.ServerConfig):Promise<any>;
 
@@ -26,10 +30,14 @@ export function QueryTableFieldList(arg1:string,arg2:string,arg3:string,arg4:str
 
 export function QueryTableList(arg1:string,arg2:string):Promise<any>;
 
+export function ReadServerConfigFile():Promise<any>;
+
 export function RefreshDBConnect(arg1:string):Promise<any>;
 
 export function ReturnError(arg1:string):Promise<{[key: string]: any}>;
 
 export function ReturnSuccess(arg1:any):Promise<{[key: string]: any}>;
+
+export function SaveServerConfigFile(arg1:string):Promise<any>;
 
 export function TestDBConnect(arg1:main.ServerConfig):Promise<any>;

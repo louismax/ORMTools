@@ -9,7 +9,7 @@
 			</el-button>
 
 			<el-tooltip content="导入连接配置" placement="bottom" effect="light">
-				<el-button :text="true" style="width: 40px;">
+				<el-button :text="true" style="width: 40px;" @click="importConfig">
 					<svg t="1681303368254" class="icon" viewBox="0 0 1032 1024" version="1.1"
 						style="width: 20px; height: 20px" xmlns="http://www.w3.org/2000/svg" p-id="1064" width="200"
 						height="200">
@@ -30,7 +30,7 @@
 			</el-tooltip>
 
 			<el-tooltip content="导出连接配置" placement="bottom" effect="light">
-				<el-button :text="true" style="width: 40px;">
+				<el-button :text="true" style="width: 40px;" @click="exportConfig">
 					<svg t="1681303432514" class="icon" viewBox="0 0 1024 1024" version="1.1"
 						style="width: 20px; height: 20px" xmlns="http://www.w3.org/2000/svg" p-id="1365" width="200"
 						height="200">
@@ -251,7 +251,7 @@
 					{{ tag }}
 				</el-tag>
 				<el-input v-if="inputHideDBVisible" ref="InputHideDBRef" v-model="inputHideDBValue" style="width: 5rem;"
-					size="small" @keyup.enter="hideDBInputConfirm" @blur="hideDBInputConfirm"/>
+					size="small" @keyup.enter="hideDBInputConfirm" @blur="hideDBInputConfirm" />
 				<el-button v-else class="button-new-tag" size="small" @click="showHideDBInput">
 					+ 添加数据库名
 				</el-button>
@@ -263,7 +263,8 @@
 					{{ tag }}
 				</el-tag>
 				<el-input v-if="inputHideTableVisible" ref="InputHideTableRef" v-model="inputHideTableValue"
-					style="width: 5rem;" size="small" @keyup.enter="hideTableInputConfirm" @blur="hideTableInputConfirm"/>
+					style="width: 5rem;" size="small" @keyup.enter="hideTableInputConfirm"
+					@blur="hideTableInputConfirm" />
 				<el-button v-else class="button-new-tag" size="small" @click="showHideTableInput">
 					+ 添加表名
 				</el-button>
@@ -293,7 +294,7 @@
 				</el-tag>
 				<el-input v-if="inputHideTableColumnVisible" ref="InputHideTableColumnRef"
 					v-model="inputHideTableColumnValue" style="width: 5rem;" size="small"
-					@keyup.enter="hideTableColumnInputConfirm" @blur="hideTableColumnInputConfirm"/>
+					@keyup.enter="hideTableColumnInputConfirm" @blur="hideTableColumnInputConfirm" />
 				<el-button v-else class="button-new-tag" size="small" @click="showHideTableColumnInput">
 					+ 添加字段名
 				</el-button>
@@ -383,6 +384,30 @@
 		</el-form>
 	</el-dialog>
 
+	<el-dialog v-model="showSvrCfgStr" class="eiSvrConfig" :title="SvrCfgType == 'import'?'导入连接配置':'导出连接配置'">
+		<div style="text-align: left;" v-if="SvrCfgType != 'import'">
+			<span style="color: #ff9292;">* 完整复制下方文本，在导入时粘贴此文本即可完成导入</span>
+		</div>
+		<div>
+			<el-input v-model="SvrCfgStr" :autosize="{ minRows: 4, maxRows: 12 }" input-style="max-height: 50vh;"
+				readonly type="textarea" />
+		</div>
+
+		<template #footer>
+			<span class="dialog-footer"  v-if="SvrCfgType == 'import'">
+				<el-button @click="readSvrStrFile">读取文件</el-button>
+				<el-button @click="pasteSvrStr">从剪贴板粘贴</el-button>
+				<el-button type="primary" @click="submitSvrStr">提交</el-button>
+			</span>
+			<span class="dialog-footer" v-else>
+				<el-button @click="downloadSvrStrFile">保存为文件</el-button>
+				<el-button @click="copySvrStr">复制到剪贴板</el-button>
+			</span>
+			
+		</template>
+
+	</el-dialog>
+
 
 </template>
 
@@ -407,6 +432,10 @@
 		EditServerConfig,
 		TestDBConnect,
 		EditUserConfigItem,
+		ExportServerConfigList,
+		ImportServerConfigList,
+		SaveServerConfigFile,
+		ReadServerConfigFile,
 	} from '../../wailsjs/go/main/App'
 	import {
 		useStore
@@ -843,11 +872,11 @@
 			target.parentNode.blur();
 		}
 		target.blur();
-		
-		DefaultFieldRule().value.forEach( function(item) {
-		  ConfigForm.MySqlToStructFieldType[item.key] = item.val;
+
+		DefaultFieldRule().value.forEach(function(item) {
+			ConfigForm.MySqlToStructFieldType[item.key] = item.val;
 		})
-		
+
 		toFieldList.value = DefaultFieldRule().value
 	}
 
@@ -866,6 +895,193 @@
 			}
 		})
 	}
+
+	let showSvrCfgStr = ref(false);
+	let SvrCfgStr = ref('');
+	let SvrCfgType = ref('')
+
+
+	const exportConfig = (e) => {
+		// 添加失去焦点事件
+		let target = e.target;
+		//console.log(e)
+		if (target.nodeName === "BUTTON" || target.nodeName === "SPAN") {
+			target.parentNode.blur();
+		} else if (target.nodeName === "svg") {
+			target.parentNode.parentNode.blur();
+		} else if (target.nodeName === "path") {
+			target.parentNode.parentNode.parentNode.blur();
+		}
+		target.blur();
+
+		ExportServerConfigList().then(result => {
+			if (result.State == true) {
+				//console.log(result)
+				showSvrCfgStr.value = true;
+				SvrCfgStr.value = result.Data
+				SvrCfgType.value = "export";
+			} else {
+				ElMessageBox({
+					title: "导出配置失败",
+					message: result.Message,
+					type: 'error'
+				})
+			}
+		})
+	}
+	
+	const importConfig = (e) => {
+		// 添加失去焦点事件
+		let target = e.target;
+		//console.log(e)
+		if (target.nodeName === "BUTTON" || target.nodeName === "SPAN") {
+			target.parentNode.blur();
+		} else if (target.nodeName === "svg") {
+			target.parentNode.parentNode.blur();
+		} else if (target.nodeName === "path") {
+			target.parentNode.parentNode.parentNode.blur();
+		}
+		target.blur();
+	
+		showSvrCfgStr.value = true;
+		SvrCfgStr.value = "";
+		SvrCfgType.value = "import";
+	}
+	
+	const copySvrStr = (e) => {
+		// 添加失去焦点事件
+		let target = e.target;
+		if (target.nodeName === "BUTTON" || target.nodeName === "SPAN") {
+			target.parentNode.blur();
+		}
+		target.blur();
+
+		window.runtime.ClipboardSetText(SvrCfgStr.value).then(({
+				value
+			}) => {
+				ElMessage({
+					message: '复制成功!',
+					type: 'success',
+				})
+			})
+			.catch(() => {})
+	}
+	const pasteSvrStr = (e) => {
+		// 添加失去焦点事件
+		let target = e.target;
+		if (target.nodeName === "BUTTON" || target.nodeName === "SPAN") {
+			target.parentNode.blur();
+		}
+		target.blur();
+	
+		window.runtime.ClipboardGetText().then((s) => {
+				SvrCfgStr.value = s;
+				ElMessage({
+					message: '粘贴成功!',
+					type: 'success',
+				})
+			})
+			.catch(() => {})
+	}
+	
+	const downloadSvrStrFile = (e) => {
+		// 添加失去焦点事件
+		let target = e.target;
+		if (target.nodeName === "BUTTON" || target.nodeName === "SPAN") {
+			target.parentNode.blur();
+		}
+		target.blur();
+		const loading = ElLoading.service({
+			//lock: true,
+			text: 'Loading',
+			//background: 'rgba(0, 0, 0, 0.7)',
+		})
+
+		SaveServerConfigFile(SvrCfgStr.value).then(result => {
+			loading.close();
+			if (result.State == true) {
+				if (result.Data == "cancel") {
+					ElMessage('取消操作')
+				} else {
+					ElMessage({
+						message: result.Data,
+						type: 'success',
+					})
+				}
+			} else {
+				ElMessageBox({
+					title: "导出配置失败",
+					message: result.Message,
+					type: 'error'
+				})
+			}
+		})
+	}
+	
+	const readSvrStrFile = (e) => {
+		// 添加失去焦点事件
+		let target = e.target;
+		if (target.nodeName === "BUTTON" || target.nodeName === "SPAN") {
+			target.parentNode.blur();
+		}
+		target.blur();
+		const loading = ElLoading.service({
+			//lock: true,
+			text: 'Loading',
+			//background: 'rgba(0, 0, 0, 0.7)',
+		})
+		ReadServerConfigFile().then(result => {
+			loading.close();
+			console.log(result)
+			if (result.State == true) {
+				if (result.Data == "cancel") {
+					ElMessage('取消操作')
+				} else {
+					SvrCfgStr.value = result.Data;
+					ElMessage({
+						message: '成功!',
+						type: 'success',
+					})
+				}
+			} else {
+				ElMessageBox({
+					title: "导出配置失败",
+					message: result.Message,
+					type: 'error'
+				})
+			}
+		})
+	}
+	
+	const submitSvrStr = (e) => {
+		// 添加失去焦点事件
+		let target = e.target;
+		if (target.nodeName === "BUTTON" || target.nodeName === "SPAN") {
+			target.parentNode.blur();
+		}
+		target.blur();
+		
+		ImportServerConfigList(SvrCfgStr.value).then(result => {
+			console.log(result)
+			if (result.State == true) {
+				emit('GetServerList');
+				showSvrCfgStr.value = false;
+				ElMessage({
+					message: '导入成功!',
+					type: 'success',
+				})
+				
+			} else {
+				ElMessageBox({
+					title: "导出配置失败",
+					message: result.Message,
+					type: 'error'
+				})
+			}
+		})
+		
+	}
+	
 </script>
 
 <style>
@@ -958,5 +1174,34 @@
 
 	.el-table__empty-text {
 		line-height: 50px !important;
+	}
+
+	/* 	.eiSvrConfig{
+		max-height: 50vh;
+	} */
+	.eiSvrConfig .el-dialog__body {
+		padding-top: 0;
+		padding-bottom: 0;
+
+		& textarea {
+			&::-webkit-scrollbar {
+				width: 8px;
+			}
+
+			&::-webkit-scrollbar-track {
+				background: rgb(239, 239, 239);
+				border-radius: 2px;
+			}
+
+			&::-webkit-scrollbar-thumb {
+				background: #bfbfbf;
+				border-radius: 10px;
+			}
+
+			&::-webkit-scrollbar-thumb:hover {
+				background: #7d7d7d;
+			}
+		}
+
 	}
 </style>
