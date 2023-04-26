@@ -13,6 +13,9 @@ ORMTools是一款可以将数据库表结构转化为Golang Struct结构的可�
 ![GitHub last commit](https://img.shields.io/github/last-commit/louismax/ORMTools)
 ![GitHub Release Date](https://img.shields.io/github/release-date/louismax/ORMTools)
 
+
+[立即下载使用](https://github.com/louismax/ORMTools/releases/tag/v1.0.1)
+
 ## webview2运行时依赖
 ORMTools需要依赖[Microsoft WebView2](https://developer.microsoft.com/en-us/microsoft-edge/webview2/)运行时，默认情况下，Windows 11 会安装它，但有些机器不会。
 在未检测到合适的运行时的时候，应用会主动下载并运行WebView2运行时引导程序
